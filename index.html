@@ -237,12 +237,15 @@ function setState(stateName) {
         if (document.getElementById('table').innerHTML === "") {
             buildTable(); 
         }
-        startTimer(); // Эту функцию нужно будет выделить отдельно
+        function startTimer() {
+    console.log("Таймер запущен...");
+
     } 
     else if (stateName === 'WIN') {
         document.getElementById('state-win').style.display = 'flex';
-        sendDataToGoogle(); // Сюда мы прикрутим отправку в таблицу позже
-    }
+        function sendDataToGoogle() {
+    console.log("Данные отправляются...");
+}
 }
     // Твой массив (сокращенно для примера, вставь сюда полный из прошлых этапов)
     const elements = [
