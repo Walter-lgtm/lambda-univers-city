@@ -1,3 +1,16 @@
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+function playHevClick() {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(800, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.1);
+}
 const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 
