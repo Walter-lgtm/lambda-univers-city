@@ -15,29 +15,26 @@ const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 
 function setState(stateName) {
+    // ОЖИВЛЯЕМ ЗВУК: Смартфон разрешит аудио только после этого клика
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
     document.getElementById('state-menu').style.display = 'none';
     document.getElementById('state-game').style.display = 'none';
     document.getElementById('state-win').style.display = 'none';
 
     if (stateName === 'GAME') {
         const nick = document.getElementById('player-name').value;
-        if (!nick) return alert("ВВЕДИТЕ ВАШ НИКНЕЙМ!");
-        
+        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ!");
         document.getElementById('state-game').style.display = 'block';
-        
-        // Построение таблицы, если она пустая
         if (document.getElementById('table').innerHTML === "") buildTable();
-        
-        // ЗАПУСК ТАЙМЕРА — БЕЗ ЭТОГО ВРЕМЯ НЕ ПОЙДЕТ!
-        startTimer(); 
-    } 
-    else if (stateName === 'MENU') {
+        startTimer(); // Запуск отсчета
+    } else if (stateName === 'MENU') {
         document.getElementById('state-menu').style.display = 'flex';
-    } 
-    else if (stateName === 'WIN') {
+    } else if (stateName === 'WIN') {
         document.getElementById('state-win').style.display = 'flex';
-        // Здесь мы остановим таймер при победе
-        clearInterval(timerInterval);
+        if (timerInterval) clearInterval(timerInterval); // Остановка времени
     }
 }
 
@@ -50,7 +47,9 @@ function buildTable() {
         div.style.gridColumn = el.x;
         div.style.gridRow = el.y;
         div.innerHTML = `<span class="num">${el.n}</span><span class="sym">${el.s}</span><span class="name">${el.name}</span>`;
+        
         div.onclick = () => {
+            playHevClick(); // ДОБАВИЛИ ЗВУК КЛИКА
             showDetails(el);
             if(isQuest) handleQuest(el.n, div);
         };
@@ -60,56 +59,76 @@ function buildTable() {
 
 function showDetails(el) {
     const content = document.getElementById('content');
-    content.innerHTML = `<h2>[ ${el.s} ]</h2><p>${el.name}</p><p>Масса: ${el.m}</p>`;
+    // Добавляем больше данных для солидности терминала
+    content.innerHTML = `
+        <h2 style="color:var(--orange); margin-top:0;">[ ОБЪЕКТ: ${el.s} ]</h2>
+        <p><b style="color:var(--orange)">ИМЯ:</b> ${el.name}</p>
+        <p><b style="color:var(--orange)">МАССА:</b> ${el.m}</p>
+        <p><b style="color:var(--orange)">ЗАРЯД ЯДРА:</b> +${el.n}</p>
+        <p style="font-size:0.8rem; color:#888; border-top:1px solid #333; pt-10">Статус: Анализ завершен.</p>
+    `;
     document.getElementById('details').classList.add('open');
 }
 
-function closeDetails() { document.getElementById('details').classList.remove('open'); }
+function closeDetails() { 
+    document.getElementById('details').classList.remove('open'); 
+}
 
 function handleQuest(id, div) {
     if (!div.classList.contains('stabilized')) {
         div.classList.add('stabilized');
+        // Красим элемент в оранжевый при активации
         div.style.background = "var(--orange)";
+        div.style.color = "#000";
         
-        // ВСПЫШКА ЛЯМБДЫ
+        // ВСПЫШКА ЛЯМБДЫ (Зеленый сектор)
         const logo = document.querySelector('.sticky-header .lambda-icon');
-        logo.classList.add('lambda-flash');
-        setTimeout(() => logo.classList.remove('lambda-flash'), 1000);
+        if (logo) {
+            logo.classList.add('lambda-flash');
+            setTimeout(() => logo.classList.remove('lambda-flash'), 1000);
+        }
 
         discovered++;
-        if(discovered === 4) setTimeout(() => setState('WIN'), 800);
+        // Если нашли все 4 (O, Fe, Ag, Au) — победа
+        if(discovered === 4) {
+            setTimeout(() => setState('WIN'), 800);
+        }
     }
 }
-
 let timerInterval; // Глобальный пульс системы
 
 function startTimer() {
     let timeLeft = 900; // 15 минут до каскадного резонанса
     const timerDisplay = document.getElementById('timer');
     
-    if (timerInterval) clearInterval(timerInterval); // Сброс, если запускаем заново
+    // Сброс прогресса при новом старте
+    discovered = 0; 
+    
+    if (timerInterval) clearInterval(timerInterval); 
 
     timerInterval = setInterval(() => {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             alert("КРИТИЧЕСКАЯ МАССА ДОСТИГНУТА! СИСТЕМА ПЕРЕЗАГРУЖАЕТСЯ...");
-            location.reload(); // Перезагрузка страницы при проигрыше
+            location.reload(); 
             return;
         }
         timeLeft--;
         const mins = Math.floor(timeLeft / 60);
         const secs = timeLeft % 60;
         
-        // Обновляем табло
         if (timerDisplay) {
             timerDisplay.innerText = `${mins}:${secs < 10 ? '0' + secs : secs}`;
         }
         
-        // Визуальный эффект опасности на последней минуте
         if (timeLeft < 60 && timerDisplay) {
             timerDisplay.style.color = "#ff0000";
             timerDisplay.style.textShadow = "0 0 15px #ff0000";
         }
     }, 1000);
 }
-window.onload = () => setState('MENU');
+
+// ИНИЦИАЛИЗАЦИЯ: Система переходит в состояние МЕНЮ при загрузке
+window.onload = () => {
+    setState('MENU');
+};
