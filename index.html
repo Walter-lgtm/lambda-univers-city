@@ -214,39 +214,61 @@
     const questTargets = [8, 26, 47, 79];
     let discovered = 0;
 
-    // 2. Добавляем функцию-дирижера (State Machine)
+    // 2. ФУНКЦИЯ-ДИРИЖЕР (STATE MACHINE)
 function setState(stateName) {
-    // Прячем все три блока
-    document.getElementById('state-menu').style.display = 'none';
-    document.getElementById('state-game').style.display = 'none';
-    document.getElementById('state-win').style.display = 'none';
+    // Находим контейнеры (убедись, что ID в HTML совпадают!)
+    const menu = document.getElementById('state-menu');
+    const game = document.getElementById('state-game');
+    const win = document.getElementById('state-win');
 
-    // Включаем нужный
+    // Прячем всё (защита от ошибок, если какой-то ID не найден)
+    if (menu) menu.style.display = 'none';
+    if (game) game.style.display = 'none';
+    if (win) win.style.display = 'none';
+
     if (stateName === 'MENU') {
-        document.getElementById('state-menu').style.display = 'flex';
+        if (menu) menu.style.display = 'flex';
     } 
     else if (stateName === 'GAME') {
-        const name = document.getElementById('player-name').value;
+        const nameInput = document.getElementById('player-name');
+        const name = nameInput ? nameInput.value : "";
+
         if (!name) { 
-            alert("ВВЕДИТЕ ИМЯ ПАДАВАНА ДЛЯ АВТОРИЗАЦИИ!"); 
-            document.getElementById('state-menu').style.display = 'flex';
+            alert("ВВЕДИТЕ ВАШ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!"); 
+            if (menu) menu.style.display = 'flex';
             return; 
         }
-        document.getElementById('state-game').style.display = 'block';
-        // Здесь мы запускаем построение таблицы и таймер только при старте!
-        if (document.getElementById('table').innerHTML === "") {
+
+        if (game) game.style.display = 'block';
+        
+        // Запуск сборки таблицы, если она пустая
+        const table = document.getElementById('table');
+        if (table && table.innerHTML.trim() === "") {
             buildTable(); 
         }
-        function startTimer() {
-    console.log("Таймер запущен...");
-
+        
+        startTimer(); // Вызов функции
     } 
     else if (stateName === 'WIN') {
-        document.getElementById('state-win').style.display = 'flex';
-        function sendDataToGoogle() {
-    console.log("Данные отправляются...");
+        if (win) win.style.display = 'flex';
+        sendDataToGoogle(); // Вызов функции
+    }
 }
+
+// 3. ФУНКЦИИ-ЗАГЛУШКИ (ВЫНЕСЕНЫ НАРУЖУ)
+function startTimer() {
+    console.log("Таймер запущен...");
 }
+
+function sendDataToGoogle() {
+    console.log("Данные отправляются в Google Таблицу...");
+}
+
+// 4. ЗАПУСК ПРИ ЗАГРУЗКЕ
+window.onload = () => {
+    setState('MENU');
+};
+
     // Твой массив (сокращенно для примера, вставь сюда полный из прошлых этапов)
     const elements = [
         { n: 1, s: "H", name: "Водород", lat: "Hydrogenium", m: 1.008, v: "I", c: "1s¹", x: 1, y: 1 },
