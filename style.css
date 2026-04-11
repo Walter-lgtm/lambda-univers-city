@@ -44,6 +44,13 @@ body {
     background: transparent;
 }
 
+.lambda-flash {
+    color: #00ff00 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 30px #00ff00 !important;
+    transition: 0.2s;
+}
+
 .input-field {
     background: transparent;
     border: none;
