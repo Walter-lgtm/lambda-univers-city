@@ -126,10 +126,60 @@
 
         .data-row { margin: 8px 0; font-size: 14px; border-bottom: 1px solid #222; }
         .data-label { color: var(--orange); margin-right: 10px; }
+        /* Добавь это к стилям */
+#main-menu {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+}
+
+.menu-button {
+    width: 80%;
+    padding: 15px;
+    margin: 10px;
+    border: 1px solid var(--orange);
+    color: var(--orange);
+    background: transparent;
+    font-family: 'Courier New', monospace;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 0 5px var(--orange);
+}
+
+.menu-button:disabled {
+    border-color: #444;
+    color: #444;
+    box-shadow: none;
+}
+
+.input-field {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--orange);
+    color: #fff;
+    padding: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Courier New', monospace;
+}
     </style>
 </head>
 <body>
 
+<div id="main-menu">
+    <div class="lambda-logo">λ</div>
+    <h2 style="color:var(--orange)">SYSTEM_ACCESS_GRANTED</h2>
+    <input type="text" id="player-name" class="input-field" placeholder="ВВЕДИТЕ ИМЯ ПАДАВАНА">
+    
+    <button class="menu-button" onclick="startGame('sector_c')">СЕКТОР C: ПСХЭ-СТАБИЛИЗАЦИЯ</button>
+    <button class="menu-button" disabled>СЕКТОР D: (ЗАБЛОКИРОВАНО)</button>
+    <button class="menu-button" disabled>СЕКТОР E: (ЗАБЛОКИРОВАНО)</button>
+</div>
 <div class="sticky-header">
     <div class="lambda-icon">λ</div>
     <div id="status-text" style="font-size: 10px; color: #888;">TERMINAL_V5_MOBILE</div>
@@ -164,6 +214,36 @@
     const questTargets = [8, 26, 47, 79];
     let discovered = 0;
 
+    // 2. Добавляем функцию-дирижера (State Machine)
+function setState(stateName) {
+    // Прячем все три блока
+    document.getElementById('state-menu').style.display = 'none';
+    document.getElementById('state-game').style.display = 'none';
+    document.getElementById('state-win').style.display = 'none';
+
+    // Включаем нужный
+    if (stateName === 'MENU') {
+        document.getElementById('state-menu').style.display = 'flex';
+    } 
+    else if (stateName === 'GAME') {
+        const name = document.getElementById('player-name').value;
+        if (!name) { 
+            alert("ВВЕДИТЕ ИМЯ ПАДАВАНА ДЛЯ АВТОРИЗАЦИИ!"); 
+            document.getElementById('state-menu').style.display = 'flex';
+            return; 
+        }
+        document.getElementById('state-game').style.display = 'block';
+        // Здесь мы запускаем построение таблицы и таймер только при старте!
+        if (document.getElementById('table').innerHTML === "") {
+            buildTable(); 
+        }
+        startTimer(); // Эту функцию нужно будет выделить отдельно
+    } 
+    else if (stateName === 'WIN') {
+        document.getElementById('state-win').style.display = 'flex';
+        sendDataToGoogle(); // Сюда мы прикрутим отправку в таблицу позже
+    }
+}
     // Твой массив (сокращенно для примера, вставь сюда полный из прошлых этапов)
     const elements = [
         { n: 1, s: "H", name: "Водород", lat: "Hydrogenium", m: 1.008, v: "I", c: "1s¹", x: 1, y: 1 },
@@ -293,7 +373,7 @@
         { n: 102, s: "No", name: "Нобелий", lat: "Nobelium", m: 259, v: "II, III", c: "[Rn] 5f¹⁴ 7s²", x: 17, y: 10 },
         { n: 103, s: "Lr", name: "Лоуренсий", lat: "Lawrencium", m: 262, v: "III", c: "[Rn] 5f¹⁴ 6d¹ 7s²", x: 18, y: 10 }
     ];
-
+    
     function buildTable() {
         const table = document.getElementById('table');
         elements.forEach(el => {
