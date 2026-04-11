@@ -29,17 +29,19 @@ body {
 }
 
 .lambda-logo {
-    font-size: 80px;
-    color: var(--orange);
-    border: 5px solid var(--orange);
+    width: 80px;
+    height: 80px;
+    border: 4px solid var(--orange); /* Оранжевый круг */
     border-radius: 50%;
-    width: 120px;
-    height: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    box-shadow: 0 0 20px var(--orange);
+    color: var(--orange); /* Оранжевая буква */
+    font-size: 50px;
+    font-weight: bold;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 0 15px var(--orange); /* Свечение */
+    background: transparent;
 }
 
 .input-field {
