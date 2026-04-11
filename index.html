@@ -37,12 +37,26 @@
 
     <!-- 3. ЭКРАН ПОБЕДЫ -->
     <div id="state-win" style="display:none">
-        <div class="lambda-logo" style="width:100px; height:100px; font-size:60px;">λ</div>
-        <h1 class="win-title">ПОРТАЛ ЗАКРЫТ.<br>СИНГУЛЯРНОСТЬ В НОРМЕ.</h1>
-        <p style="color: #888;">ВАШ КОД ПОДТВЕРЖДЕНИЯ:</p>
-        <div class="win-code">HL-SINGULARITY-106</div>
-        <p style="margin-top: 30px; font-style: italic; color: #aaa;">"Вы... свободны... падаваны. Пока что." — G-Man</p>
+    <div class="lambda-logo" style="width:80px; height:80px; font-size:40px;">λ</div>
+    <h2 style="color:var(--orange)">ПОРТАЛ СТАБИЛИЗИРОВАН</h2>
+    
+    <div id="logic-quest" style="padding: 15px; background: rgba(255,140,0,0.05); border: 1px dashed var(--orange); margin: 10px; font-size: 0.85rem;">
+        <p style="color: #00ff00;">> ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Извлеките железный ключ из стога сена.</p>
+        <div id="items-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
+            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
+            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
+            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
+        </div>
+        <p id="logic-hint" style="margin-top: 15px; color: #888;">Выберите наиболее эффективный метод...</p>
     </div>
+
+    <!-- Этот блок покажем только после правильного ответа -->
+    <div id="final-reward" style="display:none">
+        <div class="win-code">HL-SINGULARITY-106</div>
+        <p style="color: #00ff00; margin-top: 10px;">ПРЕДЪЯВИТЕ КОД НАБЛЮДАТЕЛЮ</p>
+    </div>
+</div>
 
     <!-- ОКНО ДЕТАЛЕЙ -->
     <div id="details"><span class="close-btn" onclick="closeDetails()">✕</span><div id="content"></div></div>
