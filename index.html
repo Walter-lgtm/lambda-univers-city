@@ -7,29 +7,46 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 1. ТИТУЛЬНЫЙ ЭКРАН С ЛЕГЕНДОЙ -->
     <div id="state-menu">
         <div class="lambda-logo">λ</div>
-        <h2 style="color:var(--orange)">SYSTEM_ACCESS_GRANTED</h2>
+        <h2 style="color:var(--orange); letter-spacing: 2px;">ACCESS_TERMINAL: SECTOR_C</h2>
+        
+        <!-- БЛОК БРИФИНГА -->
+        <div id="briefing" style="text-align: left; width: 85%; padding: 15px; font-size: 0.8rem; color: #00ff00; border: 1px solid #004400; background: rgba(0,25,0,0.7); margin-bottom: 20px; line-height: 1.4;">
+            <p class="typewriter">> ВНИМАНИЕ: Каскадный резонанс в Гимназии №1!</p>
+            <p class="typewriter">> Пространство дестабилизировано.</p>
+            <p class="typewriter">> ЗАДАЧА: Найти и стабилизировать 4 элемента.</p>
+            <p style="color: var(--orange); margin-top: 10px; font-weight: bold;">У ВАС 15 МИНУТ. ПОСЛЕ — ПОЛНЫЙ РАСПАД МАТЕРИИ.</p>
+        </div>
+
         <input type="text" id="player-name" class="input-field" placeholder="ВВЕДИТЕ ВАШ НИКНЕЙМ">
-        <button class="menu-button" onclick="setState('GAME')">СЕКТОР C: ПСХЭ-СТАБИЛИЗАЦИЯ</button>
+        <button class="menu-button" onclick="setState('GAME')">ИНИЦИИРОВАТЬ СТАБИЛИЗАЦИЮ</button>
     </div>
 
+    <!-- 2. ИГРОВОЙ ЭКРАН -->
     <div id="state-game" style="display:none">
         <div class="sticky-header">
             <div class="lambda-icon">λ</div>
             <div id="timer">15:00</div>
         </div>
-        <div class="table-viewport"><div class="periodic-table" id="table"></div></div>
+        <div class="table-viewport">
+            <div class="periodic-table" id="table"></div>
+        </div>
     </div>
 
+    <!-- 3. ЭКРАН ПОБЕДЫ -->
     <div id="state-win" style="display:none">
-        <h1 class="win-title">ПОРТАЛ ЗАКРЫТ</h1>
+        <div class="lambda-logo" style="width:100px; height:100px; font-size:60px;">λ</div>
+        <h1 class="win-title">ПОРТАЛ ЗАКРЫТ.<br>СИНГУЛЯРНОСТЬ В НОРМЕ.</h1>
+        <p style="color: #888;">ВАШ КОД ПОДТВЕРЖДЕНИЯ:</p>
         <div class="win-code">HL-SINGULARITY-106</div>
+        <p style="margin-top: 30px; font-style: italic; color: #aaa;">"Вы... свободны... падаваны. Пока что." — G-Man</p>
     </div>
 
+    <!-- ОКНО ДЕТАЛЕЙ -->
     <div id="details"><span class="close-btn" onclick="closeDetails()">✕</span><div id="content"></div></div>
 
-    <!-- Подключаем скрипты -->
     <script src="periodic-table.js"></script>
     <script src="quest-engine.js"></script>
 </body>
