@@ -56,9 +56,15 @@ function closeDetails() { document.getElementById('details').classList.remove('o
 function handleQuest(id, div) {
     if (!div.classList.contains('stabilized')) {
         div.classList.add('stabilized');
-        div.style.background = "orange";
+        div.style.background = "var(--orange)";
+        
+        // ВСПЫШКА ЛЯМБДЫ
+        const logo = document.querySelector('.sticky-header .lambda-icon');
+        logo.classList.add('lambda-flash');
+        setTimeout(() => logo.classList.remove('lambda-flash'), 1000);
+
         discovered++;
-        if(discovered === 4) setTimeout(() => setState('WIN'), 500);
+        if(discovered === 4) setTimeout(() => setState('WIN'), 800);
     }
 }
 
