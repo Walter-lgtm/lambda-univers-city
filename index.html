@@ -171,12 +171,14 @@
 </head>
 <body>
 
-<div id="main-menu">
+<div id="state-menu">
     <div class="lambda-logo">λ</div>
     <h2 style="color:var(--orange)">SYSTEM_ACCESS_GRANTED</h2>
-    <input type="text" id="player-name" class="input-field" placeholder="ВВЕДИТЕ ИМЯ ПАДАВАНА">
+    <input type="text" id="player-name" class="input-field" placeholder="ВВЕДИТЕ ВАШ НИКНЕЙМ">
     
-    <button class="menu-button" onclick="startGame('sector_c')">СЕКТОР C: ПСХЭ-СТАБИЛИЗАЦИЯ</button>
+    <!-- ИСПРАВЛЕНО: Теперь вызываем правильную функцию -->
+    <button class="menu-button" onclick="setState('GAME')">СЕКТОР C: ПСХЭ-СТАБИЛИЗАЦИЯ</button>
+    
     <button class="menu-button" disabled>СЕКТОР D: (ЗАБЛОКИРОВАНО)</button>
     <button class="menu-button" disabled>СЕКТОР E: (ЗАБЛОКИРОВАНО)</button>
 </div>
