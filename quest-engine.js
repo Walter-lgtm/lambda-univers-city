@@ -132,3 +132,21 @@ function startTimer() {
 window.onload = () => {
     setState('MENU');
 };
+function checkLogic(item) {
+    const hint = document.getElementById('logic-hint');
+    const reward = document.getElementById('final-reward');
+    const quest = document.getElementById('logic-quest');
+
+    if (item === 'magnet') {
+        playHevClick(); // Наш фирменный звук
+        hint.innerHTML = "<b style='color:#00ff00;'>ВЕРНО! Железо — ферромагнетик. Магнит притянет ключ сквозь сено.</b>";
+        setTimeout(() => {
+            quest.style.display = 'none';
+            reward.style.display = 'block';
+        }, 2000);
+    } else if (item === 'matches') {
+        hint.innerHTML = "<b style='color:#ff0000;'>ОПАСНО! Сгорит и сено, и Гимназия. Ключ расплавится.</b>";
+    } else {
+        hint.innerHTML = "<b style='color:#888;'>Слишком медленно... Сингулярность требует скорости.</b>";
+    }
+}
