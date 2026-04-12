@@ -306,6 +306,76 @@ function startElementHunt() {
     }
 }
 
+let kills = 0;
+let galaxyInterval;
+
+function startGalaxyGame() {
+    kills = 0;
+    const field = document.getElementById('galaxy-field');
+    const scoreBox = document.getElementById('score-galaxy');
+    if (!field || !scoreBox) return;
+
+    scoreBox.innerText = "KILLS: 0";
+    if (galaxyInterval) clearInterval(galaxyInterval);
+    
+    // Каждые 800мс создаем новый метеорит
+    galaxyInterval = setInterval(() => createMeteor(field, scoreBox), 800);
+}
+
+function createMeteor(field, scoreBox) {
+    const meteor = document.createElement('div');
+    meteor.className = 'meteor';
+    meteor.style.left = Math.random() * (field.offsetWidth - 60) + "px";
+    meteor.style.top = "-60px";
+    field.appendChild(meteor);
+
+    let pos = -60;
+    let speed = 3 + Math.random() * 3; // Разная скорость падения
+
+    let fall = setInterval(() => {
+        if (pos > field.offsetHeight) {
+            clearInterval(fall);
+            if (meteor.parentNode) field.removeChild(meteor);
+        } else {
+            pos += speed;
+            meteor.style.top = pos + "px";
+        }
+    }, 20);
+
+    // ТАП ПО МЕТЕОРИТУ
+    meteor.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Защита от зума на смартфоне
+        destroyMeteor(meteor, field, fall, scoreBox);
+    });
+    meteor.onclick = () => destroyMeteor(meteor, field, fall, scoreBox);
+}
+
+function destroyMeteor(meteor, field, fall, scoreBox) {
+    playHevClick();
+    
+    // Эффект взрыва
+    const rect = meteor.getBoundingClientRect();
+    const fieldRect = field.getBoundingClientRect();
+    const exp = document.createElement('div');
+    exp.className = 'explosion';
+    exp.style.left = (rect.left - fieldRect.left) + "px";
+    exp.style.top = (rect.top - fieldRect.top) + "px";
+    field.appendChild(exp);
+    setTimeout(() => field.removeChild(exp), 300);
+
+    clearInterval(fall);
+    if (meteor.parentNode) field.removeChild(meteor);
+    
+    kills++;
+    scoreBox.innerText = "KILLS: " + kills;
+
+    if (kills >= 20) {
+        clearInterval(galaxyInterval);
+        alert("УГРОЗА НЕЙТРАЛИЗОВАНА! СИСТЕМА СТАБИЛЬНА.");
+        setState('WIN');
+    }
+}
+
 window.onload = () => setState('MENU');
 // Принудительная разблокировка звука для iOS/Android при любом первом тапе по экрану
 document.body.addEventListener('touchstart', function() {
