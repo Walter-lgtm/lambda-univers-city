@@ -132,21 +132,32 @@ function startTimer() {
 window.onload = () => {
     setState('MENU');
 };
+let isHayBurned = false; // Состояние стога сена
+
 function checkLogic(item) {
     const hint = document.getElementById('logic-hint');
     const reward = document.getElementById('final-reward');
-    const quest = document.getElementById('logic-quest');
-
-    if (item === 'magnet') {
-        playHevClick(); // Наш фирменный звук
-        hint.innerHTML = "<b style='color:#00ff00;'>ВЕРНО! Железо — ферромагнетик. Магнит притянет ключ сквозь сено.</b>";
-        setTimeout(() => {
-            quest.style.display = 'none';
-            reward.style.display = 'block';
-        }, 2000);
-    } else if (item === 'matches') {
-        hint.innerHTML = "<b style='color:#ff0000;'>ОПАСНО! Сгорит и сено, и Гимназия. Ключ расплавится.</b>";
+    
+    if (item === 'matches') {
+        playHevClick();
+        isHayBurned = true;
+        hint.innerHTML = "<b style='color:#ff8c00;'>СИСТЕМА: Стог сена уничтожен термическим воздействием. Остался пепел...</b>";
+        // Можно добавить визуальный эффект дыма или смену картинки
+    } 
+    else if (item === 'magnet') {
+        playHevClick();
+        if (isHayBurned) {
+            hint.innerHTML = "<b style='color:#00ff00;'>ВЕРНО! Магнит легко нашел железный ключ в пепле. Чистая физика.</b>";
+            setTimeout(() => {
+                document.getElementById('logic-quest').style.display = 'none';
+                reward.style.display = 'block';
+                // В этот момент отправляем данные в таблицу!
+                sendDataToGoogle(); 
+            }, 2000);
+        } else {
+            hint.innerHTML = "<b style='color:#888;'>Магнит бесполезен... Слишком большой объем сена блокирует поле.</b>";
+        }
     } else {
-        hint.innerHTML = "<b style='color:#888;'>Слишком медленно... Сингулярность требует скорости.</b>";
+        hint.innerHTML = "<b style='color:#ff0000;'>ОШИБКА: Этот предмет не ускорит процесс.</b>";
     }
 }
