@@ -128,6 +128,15 @@
         <button class="menu-button" style="padding:20px;" onclick="changeDir('right')">▶</button>
     </div>
 </div>
+
+    <div id="state-galaxy" style="display:none; text-align:center; padding: 10px; position: relative;">
+    <h2 style="color:var(--orange); text-shadow: 0 0 10px var(--orange);">СЕКТОР G: GALAXY_DEFENSE</h2>
+    <p style="color:#00ff00; font-size:0.7rem; margin-bottom:10px;">КРИТИЧЕСКАЯ УГРОЗА! УНИЧТОЖЬТЕ 20 ОБЪЕКТОВ!</p>
+    
+    <div id="galaxy-field" style="position:relative; width:320px; height:450px; background:#000 url('https://transparenttextures.com'); border:2px solid var(--orange); margin: 0 auto; overflow:hidden; touch-action: none;">
+        <div id="score-galaxy" style="position:absolute; top:10px; left:10px; color:#00ff00; font-family:monospace; font-size:1.2rem; z-index:10;">KILLS: 0</div>
+    </div>
+</div>
     
     <!-- 3. ЭКРАН ПОБЕДЫ -->
 <div id="state-win" style="display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
