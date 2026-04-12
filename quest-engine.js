@@ -15,31 +15,59 @@ const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 
 function setState(stateName) {
-    // Скрываем ВСЕ экраны, которые у нас есть
-    document.getElementById('state-menu').style.display = 'none';
-    document.getElementById('state-game').style.display = 'none';
-    document.getElementById('state-win').style.display = 'none';
-    
-    // Обязательно добавь эту строку, чтобы скрыть биологию, когда она не нужна
-    const bioScreen = document.getElementById('state-biology');
-    if (bioScreen) bioScreen.style.display = 'none';
+    // 1. Оживляем звук (для смартфонов)
+    if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
 
+    // 2. Список всех наших экранов (дивов)
+    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology'];
+    
+    // Скрываем все экраны разом
+    screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    // 3. Логика переключения
     if (stateName === 'MENU') {
-        document.getElementById('state-menu').style.display = 'flex';
+        const menu = document.getElementById('state-menu');
+        if (menu) menu.style.display = 'flex';
     } 
     else if (stateName === 'GAME') {
-        document.getElementById('state-game').style.display = 'block';
-        startTimer();
+        const nickInput = document.getElementById('player-name');
+        const nickname = nickInput ? nickInput.value : "";
+
+        if (!nickname) {
+            alert("ВВЕДИТЕ ВАШ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!");
+            const menu = document.getElementById('state-menu');
+            if (menu) menu.style.display = 'flex';
+            return;
+        }
+
+        const gameScreen = document.getElementById('state-game');
+        if (gameScreen) gameScreen.style.display = 'block';
+
+        // Важно: строим таблицу только если она пустая
+        const table = document.getElementById('table');
+        if (table && table.innerHTML.trim() === "") {
+            buildTable();
+        }
+        
+        // Запускаем таймер (проверь, что функция startTimer у тебя есть ниже)
+        if (typeof startTimer === 'function') startTimer();
     } 
     else if (stateName === 'BIOLOGY') {
-        // Показываем Сектор B
-        if (bioScreen) bioScreen.style.display = 'block';
+        const bio = document.getElementById('state-biology');
+        if (bio) bio.style.display = 'block';
     }
     else if (stateName === 'WIN') {
-        document.getElementById('state-win').style.display = 'flex';
-        sendDataToGoogle(); // Теперь данные в таблицу уходят только в самом конце
+        const win = document.getElementById('state-win');
+        if (win) win.style.display = 'flex';
+        if (typeof timerInterval !== 'undefined') clearInterval(timerInterval);
+        if (typeof sendDataToGoogle === 'function') sendDataToGoogle();
     }
-
+}
 function buildTable() {
     const table = document.getElementById('table');
     elements.forEach(el => {
