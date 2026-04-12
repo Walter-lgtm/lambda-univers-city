@@ -193,19 +193,36 @@ function checkBio(type) {
 
 function verifyBiology() {
     playHevClick();
-    const ans1 = document.getElementById('bio-1').value; // Дельфин
-    const ans6 = document.getElementById('bio-6').value; // Головокраб
+    
+    // Сбор данных
+    const answers = {
+        1: document.getElementById('bio-1').value, // Дельфин -> water
+        2: document.getElementById('bio-2').value, // Орел -> land-air
+        3: document.getElementById('bio-3').value, // Крот -> soil
+        4: document.getElementById('bio-4').value, // Червь -> organism/soil
+        5: document.getElementById('bio-5').value, // Верблюд -> land-air
+        6: document.getElementById('bio-6').value  // Головокраб -> xen
+    };
+
     const hint = document.getElementById('bio-hint');
 
-    // Логика: если Дельфин в воде И Головокраб в Xen — успех
-    if (ans1 === 'water' && ans6 === 'xen') {
+    // ПРОВЕРКА
+    const isCorrect = 
+        answers[1] === 'water' && 
+        answers[2] === 'land-air' && 
+        answers[3] === 'soil' && 
+        (answers[4] === 'organism' || answers[4] === 'soil') && 
+        answers[5] === 'land-air' && 
+        answers[6] === 'xen';
+
+    if (isCorrect) {
         hint.style.color = "#00ff00";
-        hint.innerHTML = "АНАЛИЗ ЗАВЕРШЕН. ИНОПЛАНЕТНАЯ УГРОЗА ЛОКАЛИЗОВАНА.";
+        hint.innerHTML = "АНАЛИЗ ЗАВЕРШЕН. ВСЕ СРЕДЫ ИДЕНТИФИЦИРОВАНЫ ВЕРНО.";
         setTimeout(() => {
-            alert("ДОСТУП К СЕКТОРУ E ОТКРЫТ...");
-            setState('SNAKE'); // Переход к Змейке
+            setState('SNAKE'); // Направляем в Сектор со Змейкой
         }, 2000);
     } else {
-        hint.innerHTML = "ОШИБКА: ДАННЫЕ НЕ СОВПАДАЮТ С РЕАЛЬНОСТЬЮ.";
+        hint.style.color = "red";
+        hint.innerHTML = "ОШИБКА: НЕСООТВЕТСТВИЕ БИОМОВ. ПРОВЕРЬТЕ ДАННЫЕ.";
     }
 }
