@@ -226,3 +226,75 @@ function verifyBiology() {
         hint.innerHTML = "ОШИБКА: НЕСООТВЕТСТВИЕ БИОМОВ. ПРОВЕРЬТЕ ДАННЫЕ.";
     }
 }
+
+let snake, food, direction, gameLoop;
+const canvas = document.getElementById('snakeCanvas');
+const ctx = (canvas) ? canvas.getContext('2d') : null;
+const box = 15; // Размер ячейки
+
+function startSnakeGame() {
+    snake = [{x: 10 * box, y: 10 * box}];
+    food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+    direction = "right";
+    if (gameLoop) clearInterval(gameLoop);
+    gameLoop = setInterval(drawSnake, 150); // Скорость Буллсквида
+}
+
+function changeDir(d) {
+    playHevClick();
+    if (d === 'up' && direction !== 'down') direction = 'up';
+    if (d === 'down' && direction !== 'up') direction = 'down';
+    if (d === 'left' && direction !== 'right') direction = 'left';
+    if (d === 'right' && direction !== 'left') direction = 'right';
+}
+
+function drawSnake() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, 300, 300);
+
+    for (let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = (i === 0) ? "#ff8c00" : "#555"; // Голова оранжевая, хвост серый
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    ctx.fillStyle = "#00ff00"; // Цвет изотопа
+    ctx.fillRect(food.x, food.y, box, box);
+
+    let snakeX = snake[0].x;
+    let snakeY = snake[0].y;
+
+    if (direction === "up") snakeY -= box;
+    if (direction === "down") snakeY += box;
+    if (direction === "left") snakeX -= box;
+    if (direction === "right") snakeX += box;
+
+    // Проверка поедания
+    if (snakeX === food.x && snakeY === food.y) {
+        food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
+        if (snake.length >= 10) { // Нужно собрать 10 штук
+            clearInterval(gameLoop);
+            alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН. ПЕРЕХОД К ФИНАЛУ...");
+            setState('WIN');
+        }
+    } else {
+        snake.pop();
+    }
+
+    let newHead = { x: snakeX, y: snakeY };
+
+    // Столкновение со стенами или собой
+    if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
+        clearInterval(gameLoop);
+        alert("ОШИБКА: ОБЪЕКТ ПОГИБ. ПЕРЕЗАПУСК СЕКТОРА...");
+        startSnakeGame();
+    }
+
+    snake.unshift(newHead);
+}
+
+function collision(head, array) {
+    for (let i = 0; i < array.length; i++) {
+        if (head.x === array[i].x && head.y === array[i].y) return true;
+    }
+    return false;
+}
