@@ -19,7 +19,9 @@ function setState(stateName) {
         audioContext.resume();
     }
 
-    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology'];
+    // 1. Добавь 'state-snake' в этот список
+    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake'];
+    
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -37,14 +39,18 @@ function setState(stateName) {
             return;
         }
         document.getElementById('state-game').style.display = 'block';
-        if (document.getElementById('table').innerHTML.trim() === "") {
-            buildTable();
-        }
+        if (document.getElementById('table').innerHTML.trim() === "") buildTable();
         startTimer();
     } 
     else if (stateName === 'BIOLOGY') {
         const bio = document.getElementById('state-biology');
         if (bio) bio.style.display = 'block';
+    }
+    // 2. НОВОЕ СОСТОЯНИЕ ДЛЯ ЗМЕЙКИ:
+    else if (stateName === 'SNAKE') {
+        const snakeScreen = document.getElementById('state-snake');
+        if (snakeScreen) snakeScreen.style.display = 'block';
+        startSnakeGame(); // Запускаем движок змейки
     }
     else if (stateName === 'WIN') {
         const win = document.getElementById('state-win');
@@ -52,6 +58,7 @@ function setState(stateName) {
         if (timerInterval) clearInterval(timerInterval);
         sendDataToGoogle();
     }
+}
 } // <--- ПРОВЕРЬ ЭТУ СКОБКУ!
 function buildTable() {
     const table = document.getElementById('table');
