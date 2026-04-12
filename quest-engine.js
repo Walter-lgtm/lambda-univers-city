@@ -96,12 +96,18 @@ function handleQuest(id, div) {
             setTimeout(() => {
                 const gameArea = document.querySelector('.table-viewport');
                 if (gameArea) gameArea.innerHTML = `
-                    <div id="logic-quest" style="padding:20px; border:1px dashed var(--orange); text-align:center;">
-                        <p style="color:#00ff00;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
-                        <button class="menu-button" onclick="checkLogic('matches')">СПИЧКИ</button>
-                        <button class="menu-button" onclick="checkLogic('magnet')">МАГНИТ</button>
-                        <p id="logic-hint"></p>
-                    </div>`;
+                    <div id="logic-quest" style="padding:10px; border:1px dashed var(--orange); text-align:center;">
+        <p style="color:#00ff00; font-size:0.8rem;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('gloves')">ПЕРЧАТКИ</button>
+            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('rope')">ВЕРЕВКА</button>
+        </div>
+        <p id="logic-hint" style="font-size:0.7rem; margin-top:10px;"></p>
+    </div>`;
             }, 1000);
         }
     }
