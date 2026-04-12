@@ -157,24 +157,81 @@ function startSnakeGame() {
 function changeDir(d) { direction = d; playHevClick(); }
 
 // --- 6. ГАЛАКТИКА (GALAXY DEFENSE) ---
+let galaxyTimeLeft = 30; // Лимит времени
+
 function startGalaxyGame() {
-    kills = 0; const f = document.getElementById('galaxy-field'), s = document.getElementById('score-galaxy');
-    if (!f) return;
+    kills = 0;
+    galaxyTimeLeft = 30; // Сброс таймера
+    const f = document.getElementById('galaxy-field');
+    const s = document.getElementById('score-galaxy');
+    if (!f || !s) return;
+
     if (galaxyInterval) clearInterval(galaxyInterval);
+    
     galaxyInterval = setInterval(() => {
-        const m = document.createElement('div'); m.className = 'meteor';
-        m.style.left = Math.random() * 250 + "px"; m.style.top = "-50px";
-        m.innerHTML = "λ"; f.appendChild(m);
-        let p = -50, fall = setInterval(() => {
-            p += 5; m.style.top = p + "px";
-            if (p > 450) { clearInterval(fall); if(m.parentNode) f.removeChild(m); }
-        }, 30);
-        m.onclick = () => {
-            playHevClick(); kills++; s.innerText = "KILLS: " + kills;
-            clearInterval(fall); if(m.parentNode) f.removeChild(m);
-            if (kills >= 20) { clearInterval(galaxyInterval); setState('WIN'); }
-        };
-    }, 800);
+        // 1. Уменьшаем время (тикает каждые 100мс)
+        galaxyTimeLeft -= 0.1; 
+        
+        // 2. Обновляем табло
+        s.innerHTML = `KILLS: ${kills} | TIME: ${Math.max(0, Math.ceil(galaxyTimeLeft))}s`;
+
+        // 3. ПРОВЕРКА ПОБЕДЫ (набрали 20 киллов)
+        if (kills >= 20) {
+            clearInterval(galaxyInterval);
+            sendDataToGoogle(); 
+            alert("УГРОЗА НЕЙТРАЛИЗОВАНА! РЕЗУЛЬТАТ ЗАФИКСИРОВАН.");
+            setState('WIN');
+            return;
+        }
+
+        // 4. ПРОВЕРКА ПРОИГРЫША (время вышло)
+        if (galaxyTimeLeft <= 0) {
+            clearInterval(galaxyInterval);
+            sendDataToGoogle(); // Всё равно шлём данные Наблюдателю
+            alert("ВРЕМЯ ИСТЕКЛО! СЕКТОР НЕ ЗАЧИЩЕН, НО КОД ВЫДАН.");
+            setState('WIN');
+            return;
+        }
+
+        // 5. ШАНС ПОЯВЛЕНИЯ МЕТЕОРИТА
+        if (Math.random() > 0.8) {
+            createMeteor(f, s);
+        }
+    }, 100);
+}
+
+function createMeteor(field, scoreBox) {
+    const meteor = document.createElement('div');
+    meteor.className = 'meteor';
+    meteor.innerHTML = "λ";
+    meteor.style.left = Math.random() * (field.offsetWidth - 50) + "px";
+    meteor.style.top = "-50px";
+    field.appendChild(meteor);
+
+    let pos = -50;
+    let speed = 4 + Math.random() * 4; // Скорость падения
+
+    let fall = setInterval(() => {
+        if (pos > field.offsetHeight) {
+            clearInterval(fall);
+            if (meteor.parentNode) field.removeChild(meteor);
+        } else {
+            pos += speed;
+            meteor.style.top = pos + "px";
+        }
+    }, 30);
+
+    // ТАП ПО МЕТЕОРИТУ
+    const hitAction = () => {
+        playHevClick();
+        clearInterval(fall);
+        if (meteor.parentNode) field.removeChild(meteor);
+        kills++;
+        scoreBox.innerHTML = `KILLS: ${kills} | TIME: ${Math.ceil(galaxyTimeLeft)}s`;
+    };
+
+    meteor.onclick = hitAction;
+    meteor.ontouchstart = (e) => { e.preventDefault(); hitAction(); };
 }
 
 // --- 7. ФИНАЛ ---
