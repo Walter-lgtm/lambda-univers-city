@@ -78,7 +78,7 @@ function setState(stateName) {
         const galS = document.getElementById('state-galaxy');
         if (galS) {
             galS.style.display = 'block';
-            startGalaxyGame();
+            startGalaxyGame(); // Запуск нашего нового космо-титра
         }
     }
     else if (stateName === 'WIN') {
@@ -226,13 +226,15 @@ function startSnakeGame() {
         if (direction === "left") snakeX -= box;
         if (direction === "right") snakeX += box;
         if (snakeX === food.x && snakeY === food.y) {
-            playHevClick();
-            food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
+        playHevClick();
+        food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
             if (snake.length >= 10) { 
-                clearInterval(gameLoop); 
-                setState('WIN'); 
-                return; // ОСТАНАВЛИВАЕМ ВЫПОЛНЕНИЕ, ЧТОБЫ НЕ БЫЛО ОШИБОК
-            }
+        clearInterval(gameLoop); 
+        alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН! ПРЕДУПРЕЖДЕНИЕ: ВНЕШНЯЯ УГРОЗА!");
+        setState('GALAXY'); // Переход в космос
+        return;
+    }
+}
         } else {
             snake.pop();
         }
