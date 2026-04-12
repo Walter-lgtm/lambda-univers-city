@@ -143,12 +143,13 @@ function verifyBiology() {
 // --- 7. СЕКТОР S: ЗМЕЙКА ---
 let snakeTimeLeft; // Создаем переменную для времени змейки
 
+let snakeTimeLeft = 120; // Теперь время живет здесь и не сбрасывается функцией
+
 function startSnakeGame() {
     const canvas = document.getElementById('snakeCanvas');
     const ctx = canvas.getContext('2d');
     
-    // Устанавливаем 120 секунд драйва
-    snakeTimeLeft = 120; 
+    // ВАЖНО: Мы НЕ сбрасываем snakeTimeLeft здесь!
     
     snake = [{x: 10 * box, y: 10 * box}];
     food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
@@ -157,17 +158,17 @@ function startSnakeGame() {
     if (gameLoop) clearInterval(gameLoop);
     
     gameLoop = setInterval(() => {
-        // 1. ЛОГИКА ТАЙМЕРА (тикает вместе с игрой)
+        // Уменьшаем время
         snakeTimeLeft -= 0.15; 
         
+        // ЕСЛИ ВРЕМЯ ВЫШЛО — АВТОМАТИЧЕСКИЙ ФИНАЛ
         if (snakeTimeLeft <= 0) {
             clearInterval(gameLoop);
-            alert("ВРЕМЯ ИСТЕКЛО! ОБРАЗЕЦ ПОГИБ.");
-            startSnakeGame(); 
+            alert("ВРЕМЯ ИСТЕКЛО. ОБРАЗЕЦ НЕ ДОСТИГ НУЖНЫХ РАЗМЕРОВ. ЭВАКУАЦИЯ...");
+            setState('WIN'); // Переход в финал
             return;
         }
 
-        // 2. ДВИЖЕНИЕ
         let snakeX = snake[0].x;
         let snakeY = snake[0].y;
         if (direction === "up") snakeY -= box;
@@ -175,13 +176,12 @@ function startSnakeGame() {
         if (direction === "left") snakeX -= box;
         if (direction === "right") snakeX += box;
 
-        // 3. ПРОВЕРКА ЕДЫ
         if (snakeX === food.x && snakeY === food.y) {
             playHevClick();
             food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
             if (snake.length >= 10) {
                 clearInterval(gameLoop);
-                alert("ОБРАЗЕЦ ВЫРАЩЕН!");
+                alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН! ВЫДАЮЩИЙСЯ РЕЗУЛЬТАТ.");
                 setState('WIN');
                 return;
             }
@@ -191,23 +191,23 @@ function startSnakeGame() {
 
         let newHead = { x: snakeX, y: snakeY };
 
-        // 4. ПРОВЕРКА СТОЛКНОВЕНИЙ
+        // Если врезался — просто перезапуск змейки ВНУТРИ сектора
         if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
-            clearInterval(gameLoop);
-            startSnakeGame();
+            // Мгновенный сброс только самой змейки
+            snake = [{x: 10 * box, y: 10 * box}];
+            direction = "right";
+            playHevClick(); // Сигнал ошибки
             return;
         }
 
         snake.unshift(newHead);
 
-        // 5. ОТРИСОВКА
         ctx.fillStyle = "black"; 
         ctx.fillRect(0, 0, 300, 300);
         
-        // Рисуем таймер прямо на поле
         ctx.fillStyle = "#00ff00";
         ctx.font = "14px Courier New";
-        ctx.fillText("STABILITY: " + Math.ceil(snakeTimeLeft) + "s", 10, 20);
+        ctx.fillText("STABILITY: " + Math.max(0, Math.ceil(snakeTimeLeft)) + "s", 10, 20);
 
         ctx.fillStyle = "#00ff00"; 
         ctx.fillRect(food.x, food.y, box, box);
