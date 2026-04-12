@@ -133,14 +133,25 @@ function handleQuest(id, div) {
 function checkLogic(item) {
     playHevClick();
     const hint = document.getElementById('logic-hint');
+    
     if (item === 'matches') {
         isHayBurned = true;
         hint.innerHTML = "СЕНО СГОРЕЛО. ОСТАЛСЯ ПЕПЕЛ.";
-    } else if (item === 'magnet') {
+    } 
+    else if (item === 'magnet') {
         if (isHayBurned) {
-            hint.innerHTML = "КЛЮЧ НАЙДЕН! ПЕРЕХОД В СЕКТОР B...";
-            setTimeout(() => setState('BIOLOGY'), 2000);
-        } else hint.innerHTML = "СЛИШКОМ МНОГО СЕНА ДЛЯ МАГНИТА!";
+            hint.innerHTML = "<b style='color:#00ff00;'>КЛЮЧ НАЙДЕН! ПЕРЕХОД В СЕКТОР B...</b>";
+            
+            // СТЕРИЛИЗАЦИЯ: Очищаем игровое поле Сектора C/D навсегда
+            const gameArea = document.querySelector('.table-viewport');
+            if (gameArea) gameArea.innerHTML = ""; 
+
+            setTimeout(() => {
+                setState('BIOLOGY'); 
+            }, 2000);
+        } else {
+            hint.innerHTML = "СЛИШКОМ МНОГО СЕНА ДЛЯ МАГНИТА!";
+        }
     } else {
         hint.innerHTML = "ЭТОТ ПРЕДМЕТ НЕ ПОМОЖЕТ.";
     }
