@@ -23,27 +23,24 @@ let snakeTimeLeft = 120; // Таймер змейки (не сбрасывает
 
 // --- 2. МАШИНА СОСТОЯНИЙ ---
 function setState(stateName) {
-    // 1. Оживляем звук
     if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 
-    // 2. Останавливаем ВСЕ игровые циклы (важно для сброса зацикливания)
+    // Останавливаем все процессы
     if (gameLoop) clearInterval(gameLoop);
-    if (timerInterval && stateName === 'WIN') clearInterval(timerInterval);
 
-    // 3. Список всех экранов
-    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake'];
-    
-    // Скрываем всё
+    // Прячем абсолютно все экраны
+    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake', 'state-galaxy'];
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
 
-    // 4. Логика переходов
     if (stateName === 'MENU') {
         document.getElementById('state-menu').style.display = 'flex';
+        isHayBurned = false; // СБРОС СОСТОЯНИЯ СЕНА
+        discovered = 0;      // СБРОС ЭЛЕМЕНТОВ
     } 
     else if (stateName === 'GAME') {
         const nick = document.getElementById('player-name').value;
@@ -57,11 +54,17 @@ function setState(stateName) {
     }
     else if (stateName === 'SNAKE') {
         document.getElementById('state-snake').style.display = 'block';
-        startSnakeGame(); // Запуск змейки
+        startSnakeGame();
+    }
+    else if (stateName === 'GALAXY') {
+        document.getElementById('state-galaxy').style.display = 'block';
+        startGalaxyGame();
     }
     else if (stateName === 'WIN') {
         document.getElementById('state-win').style.display = 'flex';
-        sendDataToGoogle(); 
+        if (timerInterval) clearInterval(timerInterval);
+        // ВАЖНО: Мы скрываем контейнер state-game, чтобы сено не всплыло!
+        document.getElementById('state-game').style.display = 'none'; 
     }
 }
 
