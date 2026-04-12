@@ -1,4 +1,4 @@
-// --- 1. ИНИЦИАЛИЗАЦИЯ ЗВУКА ---
+// --- 1. ЗВУК И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 function playHevClick() {
     if (audioContext.state === 'suspended') audioContext.resume();
@@ -13,18 +13,17 @@ function playHevClick() {
     osc.stop(audioContext.currentTime + 0.1);
 }
 
-// --- 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
 const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 let timerInterval;
 let isHayBurned = false;
 let snake, food, direction, gameLoop;
 let box = 20;
+let snakeTimeLeft = 120; // Таймер змейки (не сбрасывается)
 
-// --- 3. МАШИНА СОСТОЯНИЙ (STATE MACHINE) ---
+// --- 2. МАШИНА СОСТОЯНИЙ ---
 function setState(stateName) {
     if (audioContext.state === 'suspended') audioContext.resume();
-
     const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake'];
     screens.forEach(id => {
         const el = document.getElementById(id);
@@ -51,10 +50,11 @@ function setState(stateName) {
     else if (stateName === 'WIN') {
         document.getElementById('state-win').style.display = 'flex';
         if (timerInterval) clearInterval(timerInterval);
+        if (gameLoop) clearInterval(gameLoop);
     }
 }
 
-// --- 4. СЕКТОР C: ХИМИЯ ---
+// --- 3. СЕКТОР C: ХИМИЯ ---
 function buildTable() {
     const table = document.getElementById('table');
     elements.forEach(el => {
@@ -97,23 +97,23 @@ function handleQuest(id, div) {
                 const gameArea = document.querySelector('.table-viewport');
                 if (gameArea) gameArea.innerHTML = `
                     <div id="logic-quest" style="padding:10px; border:1px dashed var(--orange); text-align:center;">
-        <p style="color:#00ff00; font-size:0.8rem;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('gloves')">ПЕРЧАТКИ</button>
-            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('rope')">ВЕРЕВКА</button>
-        </div>
-        <p id="logic-hint" style="font-size:0.7rem; margin-top:10px;"></p>
-    </div>`;
+                        <p style="color:#00ff00; font-size:0.8rem;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('gloves')">ПЕРЧАТКИ</button>
+                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('rope')">ВЕРЕВКА</button>
+                        </div>
+                        <p id="logic-hint" style="font-size:0.7rem; margin-top:10px;"></p>
+                    </div>`;
             }, 1000);
         }
     }
 }
 
-// --- 5. СЕКТОР D: ФИЗИКА (СЕНО) ---
+// --- 4. СЕКТОР D: ФИЗИКА ---
 function checkLogic(item) {
     playHevClick();
     const hint = document.getElementById('logic-hint');
@@ -124,104 +124,67 @@ function checkLogic(item) {
         if (isHayBurned) {
             hint.innerHTML = "КЛЮЧ НАЙДЕН! ПЕРЕХОД В СЕКТОР B...";
             setTimeout(() => setState('BIOLOGY'), 2000);
-        } else hint.innerHTML = "СЛИШКОМ МНОГО СЕНА!";
+        } else hint.innerHTML = "СЛИШКОМ МНОГО СЕНА ДЛЯ МАГНИТА!";
+    } else {
+        hint.innerHTML = "ЭТОТ ПРЕДМЕТ НЕ ПОМОЖЕТ.";
     }
 }
 
-// --- 6. СЕКТОР B: БИОЛОГИЯ ---
+// --- 5. СЕКТОР B: БИОЛОГИЯ ---
 function verifyBiology() {
     playHevClick();
     const ans1 = document.getElementById('bio-1').value;
     const ans6 = document.getElementById('bio-6').value;
     const hint = document.getElementById('bio-hint');
     if (ans1 === 'water' && ans6 === 'xen') {
-        hint.innerHTML = "УСПЕХ! ПЕРЕХОД К ТРЕНИРОВКЕ...";
+        hint.innerHTML = "УСПЕХ! ИНИЦИАЛИЗАЦИЯ ТРЕНИРОВКИ...";
         setTimeout(() => setState('SNAKE'), 2000);
-    } else hint.innerHTML = "ОШИБКА В ДАННЫХ!";
+    } else hint.innerHTML = "ОШИБКА В БИОМНЫХ ДАННЫХ!";
 }
 
-// --- 7. СЕКТОР S: ЗМЕЙКА ---
-let snakeTimeLeft; // Создаем переменную для времени змейки
-
-let snakeTimeLeft = 120; // Теперь время живет здесь и не сбрасывается функцией
-
+// --- 6. СЕКТОР S: ЗМЕЙКА ---
 function startSnakeGame() {
     const canvas = document.getElementById('snakeCanvas');
     const ctx = canvas.getContext('2d');
-    
-    // ВАЖНО: Мы НЕ сбрасываем snakeTimeLeft здесь!
-    
     snake = [{x: 10 * box, y: 10 * box}];
     food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
     direction = "right";
-
     if (gameLoop) clearInterval(gameLoop);
-    
     gameLoop = setInterval(() => {
-        // Уменьшаем время
-        snakeTimeLeft -= 0.15; 
-        
-        // ЕСЛИ ВРЕМЯ ВЫШЛО — АВТОМАТИЧЕСКИЙ ФИНАЛ
+        snakeTimeLeft -= 0.15;
         if (snakeTimeLeft <= 0) {
             clearInterval(gameLoop);
-            alert("ВРЕМЯ ИСТЕКЛО. ОБРАЗЕЦ НЕ ДОСТИГ НУЖНЫХ РАЗМЕРОВ. ЭВАКУАЦИЯ...");
-            setState('WIN'); // Переход в финал
+            alert("ВРЕМЯ ИСТЕКЛО. ЭВАКУАЦИЯ...");
+            setState('WIN');
             return;
         }
-
-        let snakeX = snake[0].x;
-        let snakeY = snake[0].y;
+        let snakeX = snake[0].x, snakeY = snake[0].y;
         if (direction === "up") snakeY -= box;
         if (direction === "down") snakeY += box;
         if (direction === "left") snakeX -= box;
         if (direction === "right") snakeX += box;
-
         if (snakeX === food.x && snakeY === food.y) {
             playHevClick();
             food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
-            if (snake.length >= 10) {
-                clearInterval(gameLoop);
-                alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН! ВЫДАЮЩИЙСЯ РЕЗУЛЬТАТ.");
-                setState('WIN');
-                return;
-            }
-        } else {
-            snake.pop();
-        }
-
+            if (snake.length >= 10) { clearInterval(gameLoop); setState('WIN'); }
+        } else snake.pop();
         let newHead = { x: snakeX, y: snakeY };
-
-        // Если врезался — просто перезапуск змейки ВНУТРИ сектора
         if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
-            // Мгновенный сброс только самой змейки
-            snake = [{x: 10 * box, y: 10 * box}];
-            direction = "right";
-            playHevClick(); // Сигнал ошибки
-            return;
+            snake = [{x: 10 * box, y: 10 * box}]; direction = "right";
+        } else {
+            snake.unshift(newHead);
+            ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
+            ctx.fillStyle = "#00ff00"; ctx.font = "14px Courier New";
+            ctx.fillText("STABILITY: " + Math.ceil(snakeTimeLeft) + "s", 10, 20);
+            ctx.fillRect(food.x, food.y, box, box);
+            snake.forEach((s, i) => { ctx.fillStyle = i===0 ? "orange" : "gray"; ctx.fillRect(s.x, s.y, box, box); });
         }
-
-        snake.unshift(newHead);
-
-        ctx.fillStyle = "black"; 
-        ctx.fillRect(0, 0, 300, 300);
-        
-        ctx.fillStyle = "#00ff00";
-        ctx.font = "14px Courier New";
-        ctx.fillText("STABILITY: " + Math.max(0, Math.ceil(snakeTimeLeft)) + "s", 10, 20);
-
-        ctx.fillStyle = "#00ff00"; 
-        ctx.fillRect(food.x, food.y, box, box);
-        
-        snake.forEach((s, i) => { 
-            ctx.fillStyle = i === 0 ? "orange" : "gray"; 
-            ctx.fillRect(s.x, s.y, box, box); 
-        });
     }, 150);
 }
 function changeDir(d) { direction = d; playHevClick(); }
 function collision(head, array) { return array.some(el => el.x === head.x && el.y === head.y); }
 
-// --- 8. ТАЙМЕР ---
+// --- 7. ТАЙМЕР ---
 function startTimer() {
     let timeLeft = 900;
     const display = document.getElementById('timer');
