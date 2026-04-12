@@ -35,6 +35,22 @@
         </div>
     </div>
 
+    <div id="state-biology" style="display:none; text-align:center; padding: 20px;">
+    <h2 style="color:var(--orange)">СЕКТОР B: БИОЛАБОРАТОРИЯ</h2>
+    <p style="color:#00ff00; font-size:0.8rem;">РАСПРЕДЕЛИТЕ ОБЪЕКТЫ ПО СРЕДАМ ОБИТАНИЯ</p>
+    
+    <div id="bio-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+        <!-- Карточки организмов -->
+        <div class="bio-card" onclick="checkBio('water')">ДЕЛЬФИН</div>
+        <div class="bio-card" onclick="checkBio('soil')">КРОТ</div>
+        <div class="bio-card" onclick="checkBio('air')">ОРЕЛ</div>
+        <div class="bio-card" onclick="checkBio('land')">ВЕРБЛЮД</div>
+        <div class="bio-card" onclick="checkBio('host')">ЧЕРВЬ</div>
+        <div class="bio-card" style="border-color:red; color:red;" onclick="checkBio('alien')">ГОЛОВОКРАБ</div>
+    </div>
+    <p id="bio-hint" style="margin-top:20px; font-style:italic;"></p>
+</div>
+
     <!-- 3. ЭКРАН ПОБЕДЫ -->
     <div id="state-win" style="display:none">
     <div class="lambda-logo" style="width:80px; height:80px; font-size:40px;">λ</div>
