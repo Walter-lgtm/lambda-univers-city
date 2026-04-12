@@ -15,28 +15,30 @@ const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 
 function setState(stateName) {
-    // ОЖИВЛЯЕМ ЗВУК: Смартфон разрешит аудио только после этого клика
-    if (audioContext.state === 'suspended') {
-        audioContext.resume();
-    }
-
+    // Скрываем ВСЕ экраны, которые у нас есть
     document.getElementById('state-menu').style.display = 'none';
     document.getElementById('state-game').style.display = 'none';
     document.getElementById('state-win').style.display = 'none';
+    
+    // Обязательно добавь эту строку, чтобы скрыть биологию, когда она не нужна
+    const bioScreen = document.getElementById('state-biology');
+    if (bioScreen) bioScreen.style.display = 'none';
 
-    if (stateName === 'GAME') {
-        const nick = document.getElementById('player-name').value;
-        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ!");
-        document.getElementById('state-game').style.display = 'block';
-        if (document.getElementById('table').innerHTML === "") buildTable();
-        startTimer(); // Запуск отсчета
-    } else if (stateName === 'MENU') {
+    if (stateName === 'MENU') {
         document.getElementById('state-menu').style.display = 'flex';
-    } else if (stateName === 'WIN') {
-        document.getElementById('state-win').style.display = 'flex';
-        if (timerInterval) clearInterval(timerInterval); // Остановка времени
+    } 
+    else if (stateName === 'GAME') {
+        document.getElementById('state-game').style.display = 'block';
+        startTimer();
+    } 
+    else if (stateName === 'BIOLOGY') {
+        // Показываем Сектор B
+        if (bioScreen) bioScreen.style.display = 'block';
     }
-}
+    else if (stateName === 'WIN') {
+        document.getElementById('state-win').style.display = 'flex';
+        sendDataToGoogle(); // Теперь данные в таблицу уходят только в самом конце
+    }
 
 function buildTable() {
     const table = document.getElementById('table');
@@ -136,29 +138,27 @@ let isHayBurned = false; // Состояние стога сена
 
 function checkLogic(item) {
     const hint = document.getElementById('logic-hint');
-    const reward = document.getElementById('final-reward');
+    // Мы больше не ищем reward здесь, мы просто переключаем экраны через setState
     
     if (item === 'matches') {
         playHevClick();
         isHayBurned = true;
-        hint.innerHTML = "<b style='color:#ff8c00;'>СИСТЕМА: Стог сена уничтожен термическим воздействием. Остался пепел...</b>";
-        // Можно добавить визуальный эффект дыма или смену картинки
+        hint.innerHTML = "<b style='color:#ff8c00;'>СИСТЕМА: Стог сена уничтожен. Остался пепел...</b>";
     } 
     else if (item === 'magnet') {
         playHevClick();
         if (isHayBurned) {
-            hint.innerHTML = "<b style='color:#00ff00;'>ВЕРНО! Магнит легко нашел железный ключ в пепле. Чистая физика.</b>";
+            hint.innerHTML = "<b style='color:#00ff00;'>ВЕРНО! Ключ найден. Инициализация Сектора B...</b>";
+            
+            // Ждем 2 секунды, чтобы падаваны прочитали успех, и переключаем экран
             setTimeout(() => {
-                document.getElementById('logic-quest').style.display = 'none';
-                reward.style.display = 'block';
-                // В этот момент отправляем данные в таблицу!
-                sendDataToGoogle(); 
+                setState('BIOLOGY'); 
             }, 2000);
         } else {
-            hint.innerHTML = "<b style='color:#888;'>Магнит бесполезен... Слишком большой объем сена блокирует поле.</b>";
+            hint.innerHTML = "<b style='color:#888;'>Магнит бесполезен... Сено блокирует поле.</b>";
         }
     } else {
-        hint.innerHTML = "<b style='color:#ff0000;'>ОШИБКА: Этот предмет не ускорит процесс.</b>";
+        hint.innerHTML = "<b style='color:#ff0000;'>ОШИБКА: Объект не подходит.</b>";
     }
 }
 
