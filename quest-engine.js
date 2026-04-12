@@ -138,25 +138,25 @@ function checkLogic(item) {
     const hint = document.getElementById('logic-hint');
     
     if (item === 'matches') {
-        isHayBurned = true;
-        hint.innerHTML = "СЕНО СГОРЕЛО. ОСТАЛСЯ ПЕПЕЛ.";
+        isHayBurned = true; // Сжигаем
+        hint.innerHTML = "<b style='color:#ff8c00;'>СЕНО УНИЧТОЖЕНО. В ПЕПЛЕ ЧТО-ТО БЛЕСТИТ...</b>";
     } 
     else if (item === 'magnet') {
-        if (isHayBurned) {
-            hint.innerHTML = "<b style='color:#00ff00;'>КЛЮЧ НАЙДЕН! ПЕРЕХОД В СЕКТОР B...</b>";
+        if (isHayBurned === true) { // ЖЕСТКАЯ ПРОВЕРКА
+            hint.innerHTML = "<b style='color:#00ff00;'>КЛЮЧ ИЗВЛЕЧЕН! ПЕРЕХОД В БИОЛАБОРАТОРИЮ...</b>";
             
-            // СТЕРИЛИЗАЦИЯ: Очищаем игровое поле Сектора C/D навсегда
-            const gameArea = document.querySelector('.table-viewport');
-            if (gameArea) gameArea.innerHTML = ""; 
+            // Очищаем поле, чтобы не было зацикливания
+            const tableArea = document.querySelector('.table-viewport');
+            if (tableArea) tableArea.innerHTML = ""; 
 
             setTimeout(() => {
                 setState('BIOLOGY'); 
             }, 2000);
         } else {
-            hint.innerHTML = "СЛИШКОМ МНОГО СЕНА ДЛЯ МАГНИТА!";
+            hint.innerHTML = "<b style='color:#ff0000;'>МАГНИТ НЕ МОЖЕТ ПРОБИТЬ ТОЛЩУ СЕНА!</b>";
         }
     } else {
-        hint.innerHTML = "ЭТОТ ПРЕДМЕТ НЕ ПОМОЖЕТ.";
+        hint.innerHTML = "ЭТОТ ПРЕДМЕТ БЕСПОЛЕЗЕН.";
     }
 }
 
