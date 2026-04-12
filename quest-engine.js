@@ -141,38 +141,81 @@ function verifyBiology() {
 }
 
 // --- 7. СЕКТОР S: ЗМЕЙКА ---
+let snakeTimeLeft; // Создаем переменную для времени змейки
+
 function startSnakeGame() {
     const canvas = document.getElementById('snakeCanvas');
     const ctx = canvas.getContext('2d');
+    
+    // Устанавливаем 120 секунд драйва
+    snakeTimeLeft = 120; 
+    
     snake = [{x: 10 * box, y: 10 * box}];
     food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
     direction = "right";
+
     if (gameLoop) clearInterval(gameLoop);
+    
     gameLoop = setInterval(() => {
+        // 1. ЛОГИКА ТАЙМЕРА (тикает вместе с игрой)
+        snakeTimeLeft -= 0.15; 
+        
+        if (snakeTimeLeft <= 0) {
+            clearInterval(gameLoop);
+            alert("ВРЕМЯ ИСТЕКЛО! ОБРАЗЕЦ ПОГИБ.");
+            startSnakeGame(); 
+            return;
+        }
+
+        // 2. ДВИЖЕНИЕ
         let snakeX = snake[0].x;
         let snakeY = snake[0].y;
         if (direction === "up") snakeY -= box;
         if (direction === "down") snakeY += box;
         if (direction === "left") snakeX -= box;
         if (direction === "right") snakeX += box;
+
+        // 3. ПРОВЕРКА ЕДЫ
         if (snakeX === food.x && snakeY === food.y) {
             playHevClick();
             food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
             if (snake.length >= 10) {
                 clearInterval(gameLoop);
+                alert("ОБРАЗЕЦ ВЫРАЩЕН!");
                 setState('WIN');
+                return;
             }
-        } else snake.pop();
+        } else {
+            snake.pop();
+        }
+
         let newHead = { x: snakeX, y: snakeY };
+
+        // 4. ПРОВЕРКА СТОЛКНОВЕНИЙ
         if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
             clearInterval(gameLoop);
             startSnakeGame();
-        } else {
-            snake.unshift(newHead);
-            ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
-            ctx.fillStyle = "#00ff00"; ctx.fillRect(food.x, food.y, box, box);
-            snake.forEach((s, i) => { ctx.fillStyle = i===0 ? "orange" : "gray"; ctx.fillRect(s.x, s.y, box, box); });
+            return;
         }
+
+        snake.unshift(newHead);
+
+        // 5. ОТРИСОВКА
+        ctx.fillStyle = "black"; 
+        ctx.fillRect(0, 0, 300, 300);
+        
+        // Рисуем таймер прямо на поле
+        ctx.fillStyle = "#00ff00";
+        ctx.font = "14px Courier New";
+        ctx.fillText("STABILITY: " + Math.ceil(snakeTimeLeft) + "s", 10, 20);
+
+        ctx.fillStyle = "#00ff00"; 
+        ctx.fillRect(food.x, food.y, box, box);
+        
+        snake.forEach((s, i) => { 
+            ctx.fillStyle = i === 0 ? "orange" : "gray"; 
+            ctx.fillRect(s.x, s.y, box, box); 
+        });
     }, 150);
 }
 function changeDir(d) { direction = d; playHevClick(); }
