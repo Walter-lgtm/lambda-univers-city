@@ -190,3 +190,22 @@ function checkBio(type) {
         hint.innerHTML = "<b style='color:red;'>ОШИБКА: Это земной организм. Ищите чужеродную ДНК!</b>";
     }
 }
+
+function verifyBiology() {
+    playHevClick();
+    const ans1 = document.getElementById('bio-1').value; // Дельфин
+    const ans6 = document.getElementById('bio-6').value; // Головокраб
+    const hint = document.getElementById('bio-hint');
+
+    // Логика: если Дельфин в воде И Головокраб в Xen — успех
+    if (ans1 === 'water' && ans6 === 'xen') {
+        hint.style.color = "#00ff00";
+        hint.innerHTML = "АНАЛИЗ ЗАВЕРШЕН. ИНОПЛАНЕТНАЯ УГРОЗА ЛОКАЛИЗОВАНА.";
+        setTimeout(() => {
+            alert("ДОСТУП К СЕКТОРУ E ОТКРЫТ...");
+            setState('SNAKE'); // Переход к Змейке
+        }, 2000);
+    } else {
+        hint.innerHTML = "ОШИБКА: ДАННЫЕ НЕ СОВПАДАЮТ С РЕАЛЬНОСТЬЮ.";
+    }
+}
