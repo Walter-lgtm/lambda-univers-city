@@ -130,26 +130,23 @@
 </div>
     
     <!-- 3. ЭКРАН ПОБЕДЫ -->
-    <div id="state-win" style="display:none">
-    <div class="lambda-logo" style="width:80px; height:80px; font-size:40px;">λ</div>
-    <h2 style="color:var(--orange)">ПОРТАЛ СТАБИЛИЗИРОВАН</h2>
+<div id="state-win" style="display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+    <div class="lambda-logo" style="width:100px; height:100px; font-size:60px; margin-bottom:20px;">λ</div>
+    <h1 style="color:var(--orange); text-shadow: 0 0 15px var(--orange);">СИНГУЛЯРНОСТЬ СТАБИЛИЗИРОВАНА</h1>
     
-    <div id="logic-quest" style="padding: 15px; background: rgba(255,140,0,0.05); border: 1px dashed var(--orange); margin: 10px; font-size: 0.85rem;">
-        <p style="color: #00ff00;">> ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: Извлеките железный ключ из стога сена.</p>
-        <div id="items-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
-            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
-            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
-            <button class="menu-button" style="font-size: 0.7rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
+    <div id="final-reward" style="margin-top:20px;">
+        <p style="color: #888; font-size: 0.9rem;">ВАШ ПЕРСОНАЛЬНЫЙ КОД ДОСТУПА:</p>
+        <div class="win-code" style="background:var(--orange); color:#000; padding:15px; font-weight:bold; font-size:1.5rem; margin: 15px 0;">
+            HL-SINGULARITY-106
         </div>
-        <p id="logic-hint" style="margin-top: 15px; color: #888;">Выберите наиболее эффективный метод...</p>
+        <p style="color: #00ff00; font-size: 0.8rem; animation: blink 1s infinite;">> ПРЕДЪЯВИТЕ ЭКРАН НАБЛЮДАТЕЛЮ ДЛЯ ПОЛУЧЕНИЯ λ-КОИНОВ</p>
     </div>
 
-    <!-- Этот блок покажем только после правильного ответа -->
-    <div id="final-reward" style="display:none">
-        <div class="win-code">HL-SINGULARITY-106</div>
-        <p style="color: #00ff00; margin-top: 10px;">ПРЕДЪЯВИТЕ КОД НАБЛЮДАТЕЛЮ</p>
-    </div>
+    <p style="margin-top: 40px; font-style: italic; color: #555; font-size: 0.8rem;">
+        "Вы... неплохо справились... падаваны. Гимназия №1... в безопасности. Пока что." — G-Man
+    </p>
+    
+    <button class="menu-button" onclick="location.reload()" style="width:200px; margin-top:20px; font-size:0.7rem;">ПЕРЕЗАГРУЗИТЬ ТЕРМИНАЛ</button>
 </div>
 
     <!-- ОКНО ДЕТАЛЕЙ -->
