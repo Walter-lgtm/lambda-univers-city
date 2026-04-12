@@ -86,28 +86,33 @@ function handleQuest(id, div) {
         div.classList.add('stabilized');
         div.style.background = "var(--orange)";
         div.style.color = "#000";
+        
         const logo = document.querySelector('.sticky-header .lambda-icon');
         if (logo) {
             logo.classList.add('lambda-flash');
             setTimeout(() => logo.classList.remove('lambda-flash'), 1000);
         }
+
         discovered++;
         if(discovered === 4) {
+            // Очищаем игровое поле и выводим Сектор D прямо ТУДА
             setTimeout(() => {
                 const gameArea = document.querySelector('.table-viewport');
-                if (gameArea) gameArea.innerHTML = `
-                    <div id="logic-quest" style="padding:10px; border:1px dashed var(--orange); text-align:center;">
-                        <p style="color:#00ff00; font-size:0.8rem;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('gloves')">ПЕРЧАТКИ</button>
-                            <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('rope')">ВЕРЕВКА</button>
-                        </div>
-                        <p id="logic-hint" style="font-size:0.7rem; margin-top:10px;"></p>
-                    </div>`;
+                if (gameArea) {
+                    gameArea.innerHTML = `
+                        <div id="logic-quest" style="padding:20px; border:1px dashed var(--orange); text-align:center;">
+                            <p style="color:#00ff00; font-size:0.8rem;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ ИЗ СЕНА</p>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('matches')">СПИЧКИ</button>
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('magnet')">МАГНИТ</button>
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('forks')">ВИЛЫ</button>
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('gloves')">ПЕРЧАТКИ</button>
+                                <button class="menu-button" style="font-size:0.6rem;" onclick="checkLogic('rope')">ВЕРЕВКА</button>
+                            </div>
+                            <p id="logic-hint" style="font-size:0.7rem; margin-top:10px;"></p>
+                        </div>`;
+                }
             }, 1000);
         }
     }
@@ -134,12 +139,22 @@ function checkLogic(item) {
 function verifyBiology() {
     playHevClick();
     const ans1 = document.getElementById('bio-1').value;
+    const ans2 = document.getElementById('bio-2').value;
+    const ans3 = document.getElementById('bio-3').value;
     const ans6 = document.getElementById('bio-6').value;
     const hint = document.getElementById('bio-hint');
-    if (ans1 === 'water' && ans6 === 'xen') {
-        hint.innerHTML = "УСПЕХ! ИНИЦИАЛИЗАЦИЯ ТРЕНИРОВКИ...";
-        setTimeout(() => setState('SNAKE'), 2000);
-    } else hint.innerHTML = "ОШИБКА В БИОМНЫХ ДАННЫХ!";
+
+    // Проверяем ключевых (Дельфин, Орел, Крот и Головокраб)
+    if (ans1 === 'water' && ans2 === 'land-air' && ans3 === 'soil' && ans6 === 'xen') {
+        hint.style.color = "#00ff00";
+        hint.innerHTML = "УСПЕХ! ИНИЦИАЛИЗАЦИЯ ТРЕНИРОВКИ ОБРАЗЦА...";
+        setTimeout(() => {
+            setState('SNAKE'); // Переход к Змейке
+        }, 2000);
+    } else {
+        hint.style.color = "red";
+        hint.innerHTML = "ОШИБКА В ДАННЫХ. ПРОВЕРЬТЕ СРЕДЫ ОБИТАНИЯ.";
+    }
 }
 
 // --- 6. СЕКТОР S: ЗМЕЙКА ---
@@ -166,18 +181,33 @@ function startSnakeGame() {
         if (snakeX === food.x && snakeY === food.y) {
             playHevClick();
             food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
-            if (snake.length >= 10) { clearInterval(gameLoop); setState('WIN'); }
-        } else snake.pop();
+            if (snake.length >= 10) { 
+                clearInterval(gameLoop); 
+                setState('WIN'); 
+                return; // ОСТАНАВЛИВАЕМ ВЫПОЛНЕНИЕ, ЧТОБЫ НЕ БЫЛО ОШИБОК
+            }
+        } else {
+            snake.pop();
+        }
+        
         let newHead = { x: snakeX, y: snakeY };
+        
         if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
-            snake = [{x: 10 * box, y: 10 * box}]; direction = "right";
+            snake = [{x: 10 * box, y: 10 * box}]; 
+            direction = "right";
+            // Не выходим из функции, просто сбрасываем положение
         } else {
             snake.unshift(newHead);
-            ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
-            ctx.fillStyle = "#00ff00"; ctx.font = "14px Courier New";
+            ctx.fillStyle = "black"; 
+            ctx.fillRect(0, 0, 300, 300);
+            ctx.fillStyle = "#00ff00"; 
+            ctx.font = "14px Courier New";
             ctx.fillText("STABILITY: " + Math.ceil(snakeTimeLeft) + "s", 10, 20);
             ctx.fillRect(food.x, food.y, box, box);
-            snake.forEach((s, i) => { ctx.fillStyle = i===0 ? "orange" : "gray"; ctx.fillRect(s.x, s.y, box, box); });
+            snake.forEach((s, i) => { 
+                ctx.fillStyle = i === 0 ? "orange" : "gray"; 
+                ctx.fillRect(s.x, s.y, box, box); 
+            });
         }
     }, 150);
 }
