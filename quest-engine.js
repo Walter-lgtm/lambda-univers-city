@@ -161,3 +161,19 @@ function checkLogic(item) {
         hint.innerHTML = "<b style='color:#ff0000;'>ОШИБКА: Этот предмет не ускорит процесс.</b>";
     }
 }
+
+function checkBio(type) {
+    const hint = document.getElementById('bio-hint');
+    playHevClick();
+
+    if (type === 'alien') {
+        hint.innerHTML = "<b style='color:#00ff00;'>ОБЪЕКТ ИДЕНТИФИЦИРОВАН: АНОМАЛИЯ ИЗ КАРМАННОГО ИЗМЕРЕНИЯ ЗЕН. В КАРАНТИН!</b>";
+        setTimeout(() => {
+            // Переход к следующему сектору (Змейка или Энергоблок)
+            alert("СЕКТОР B ЗАЧИЩЕН. ПЕРЕХОД К ЭНЕРГОБЛОКУ...");
+            setState('PHYSICS'); // Или следующий по списку
+        }, 2000);
+    } else {
+        hint.innerHTML = "<b style='color:red;'>ОШИБКА: Это земной организм. Ищите чужеродную ДНК!</b>";
+    }
+}
