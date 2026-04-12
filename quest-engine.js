@@ -21,64 +21,68 @@ let snake, food, direction, gameLoop;
 let box = 20;
 let snakeTimeLeft = 120; // Таймер змейки (не сбрасывается)
 
-// --- 2. МАШИНА СОСТОЯНИЙ ---
 function setState(stateName) {
+    // 1. Оживляем звук для смартфонов
     if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 
-    // Останавливаем все процессы
-    if (gameLoop) clearInterval(gameLoop);
+    // 2. Остановка всех активных циклов перед переключением
+    if (typeof gameLoop !== 'undefined') clearInterval(gameLoop);
+    if (typeof blinkInterval !== 'undefined') clearTimeout(blinkInterval);
+    if (typeof galaxyInterval !== 'undefined') clearInterval(galaxyInterval);
 
-    // Прячем абсолютно все экраны
+    // 3. Список всех существующих ID экранов
     const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake', 'state-galaxy'];
+    
+    // Скрываем все экраны
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
 
+    // 4. ЛОГИКА ПЕРЕКЛЮЧЕНИЯ
     if (stateName === 'MENU') {
-        document.getElementById('state-menu').style.display = 'flex';
-        isHayBurned = false; // СБРОС СОСТОЯНИЯ СЕНА
-        discovered = 0;      // СБРОС ЭЛЕМЕНТОВ
+        const menu = document.getElementById('state-menu');
+        if (menu) menu.style.display = 'flex';
+        isHayBurned = false; 
+        discovered = 0;
     } 
     else if (stateName === 'GAME') {
-        const nick = document.getElementById('player-name').value;
+        const nickInput = document.getElementById('player-name');
+        const nick = nickInput ? nickInput.value : "";
         if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!");
         
-        document.getElementById('state-game').style.display = 'block';
+        const gameS = document.getElementById('state-game');
+        if (gameS) gameS.style.display = 'block';
         
-        // Построение таблицы, если она пустая
-        if (document.getElementById('table').innerHTML.trim() === "") {
-            buildTable(); 
-        }
+        if (document.getElementById('table').innerHTML.trim() === "") buildTable();
         
-        else if (stateName === 'BIOLOGY') {
+        startTimer();        
+        startElementHunt();   
+    } 
+    else if (stateName === 'BIOLOGY') {
         const bio = document.getElementById('state-biology');
         if (bio) bio.style.display = 'block';
     }
     else if (stateName === 'SNAKE') {
-        const snakeScreen = document.getElementById('state-snake');
-        if (snakeScreen) {
-            snakeScreen.style.display = 'block';
-            startSnakeGame(); // Запускаем змейку
+        const snakeS = document.getElementById('state-snake');
+        if (snakeS) {
+            snakeS.style.display = 'block';
+            startSnakeGame(); 
         }
     }
     else if (stateName === 'GALAXY') {
-        const galaxyScreen = document.getElementById('state-galaxy');
-        if (galaxyScreen) {
-            galaxyScreen.style.display = 'block';
-            startGalaxyGame(); // Запускаем галактику
+        const galS = document.getElementById('state-galaxy');
+        if (galS) {
+            galS.style.display = 'block';
+            startGalaxyGame();
         }
     }
     else if (stateName === 'WIN') {
-        // Остановка всех фоновых процессов
+        const winS = document.getElementById('state-win');
+        if (winS) winS.style.display = 'flex';
         if (timerInterval) clearInterval(timerInterval);
-        if (gameLoop) clearInterval(gameLoop);
-        if (blinkInterval) clearTimeout(blinkInterval); 
-        if (typeof galaxyInterval !== 'undefined') clearInterval(galaxyInterval);
-        
-        document.getElementById('state-win').style.display = 'flex';
         sendDataToGoogle();
     }
 }
