@@ -110,6 +110,25 @@
     <button class="menu-button" onclick="verifyBiology()" style="margin-top:15px; width: 100%;">ПОДТВЕРДИТЬ АНАЛИЗ</button>
     <p id="bio-hint" style="font-size: 0.8rem; margin-top: 10px;"></p>
 </div>
+
+    <div id="state-snake" style="display:none; text-align:center; padding: 10px;">
+    <h2 style="color:var(--orange)">СЕКТОР S: specimen_training</h2>
+    <p style="color:#00ff00; font-size:0.7rem;">СОБЕРИТЕ 10 ИЗОТОПОВ ДЛЯ РОСТА ОБРАЗЦА</p>
+    
+    <!-- Игровое поле -->
+    <canvas id="snakeCanvas" width="300" height="300" style="border:2px solid var(--orange); background:#000; display:block; margin: 0 auto;"></canvas>
+    
+    <!-- Пульт управления для смартфонов -->
+    <div id="controls" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; width: 100%;">
+        <div></div>
+        <button class="menu-button" style="padding:20px;" onclick="changeDir('up')">▲</button>
+        <div></div>
+        <button class="menu-button" style="padding:20px;" onclick="changeDir('left')">◀</button>
+        <button class="menu-button" style="padding:20px;" onclick="changeDir('down')">▼</button>
+        <button class="menu-button" style="padding:20px;" onclick="changeDir('right')">▶</button>
+    </div>
+</div>
+    
     <!-- 3. ЭКРАН ПОБЕДЫ -->
     <div id="state-win" style="display:none">
     <div class="lambda-logo" style="width:80px; height:80px; font-size:40px;">λ</div>
