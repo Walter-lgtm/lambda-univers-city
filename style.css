@@ -198,15 +198,27 @@ body {
     line-height: 1.4;
 }
 
+.bio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 140, 0, 0.05);
+    padding: 8px 12px;
+    border: 1px solid #222;
+    font-size: 0.8rem;
+    color: #fff;
+    margin-bottom: 5px; /* Чтобы строки не слипались */
+}
+
 .bio-select {
+    width: 130px; /* Фиксированная ширина, чтобы всё было ровно */
     background: #000;
     color: var(--orange);
     border: 1px solid var(--orange);
     padding: 5px;
     font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
-.bio-row { margin-bottom: 5px; }
 
 @keyframes typing { from { width: 0 } to { width: 100% } }
 @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--orange); } }
