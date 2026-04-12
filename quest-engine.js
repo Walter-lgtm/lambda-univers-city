@@ -1,4 +1,177 @@
-// --- 1. ЗВУК И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
+// --- 1. ЗВУК И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---// 1. ЗВУК И ПЕРЕМЕННЫЕ
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+function playHevClick() {
+    if (audioContext.state === 'suspended') audioContext.resume();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.start(); osc.stop(audioContext.currentTime + 0.1);
+}
+
+const questTargets = [8, 26, 47, 79];
+let discovered = 0, timerInterval, isHayBurned = false;
+let snake, food, direction, gameLoop, box = 20, snakeTimeLeft = 120;
+let kills = 0, galaxyInterval, currentTargetId = null, blinkInterval;
+
+// 2. МАШИНА СОСТОЯНИЙ (ГЛАВНЫЙ РУБИЛЬНИК)
+function setState(stateName) {
+    if (audioContext.state === 'suspended') audioContext.resume();
+    if (gameLoop) clearInterval(gameLoop);
+    if (galaxyInterval) clearInterval(galaxyInterval);
+    if (blinkInterval) clearTimeout(blinkInterval);
+
+    const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake', 'state-galaxy'];
+    screens.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+
+    if (stateName === 'MENU') {
+        document.getElementById('state-menu').style.display = 'flex';
+        isHayBurned = false; discovered = 0;
+    } else if (stateName === 'GAME') {
+        const nick = document.getElementById('player-name').value;
+        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ!");
+        document.getElementById('state-game').style.display = 'block';
+        if (document.getElementById('table').innerHTML.trim() === "") buildTable();
+        startTimer(); startElementHunt();
+    } else if (stateName === 'BIOLOGY') {
+        document.getElementById('state-biology').style.display = 'block';
+    } else if (stateName === 'SNAKE') {
+        document.getElementById('state-snake').style.display = 'block';
+        startSnakeGame();
+    } else if (stateName === 'GALAXY') {
+        document.getElementById('state-galaxy').style.display = 'block';
+        startGalaxyGame();
+    } else if (stateName === 'WIN') {
+        document.getElementById('state-win').style.display = 'flex';
+        if (timerInterval) clearInterval(timerInterval);
+        sendDataToGoogle();
+    }
+}
+
+// 3. СЕКТОР C & D (ХИМИЯ И ФИЗИКА)
+function buildTable() {
+    const table = document.getElementById('table');
+    elements.forEach(el => {
+        const div = document.createElement('div');
+        div.setAttribute('data-id', el.n);
+        div.className = 'element' + (questTargets.includes(el.n) ? ' active-quest' : '');
+        div.style.gridColumn = el.x; div.style.gridRow = el.y;
+        div.innerHTML = `<span class="num">${el.n}</span><span class="sym">${el.s}</span><span class="name">${el.name}</span>`;
+        div.onclick = () => { playHevClick(); showDetails(el); if(questTargets.includes(el.n)) handleQuest(el.n, div); };
+        table.appendChild(div);
+    });
+}
+
+function startElementHunt() {
+    const remaining = questTargets.filter(id => {
+        const elDiv = document.querySelector(`.element[data-id="${id}"]`);
+        return elDiv && !elDiv.classList.contains('stabilized');
+    });
+    document.querySelectorAll('.element').forEach(el => el.classList.remove('target-blink'));
+    if (remaining.length > 0) {
+        currentTargetId = remaining[Math.floor(Math.random() * remaining.length)];
+        const targetDiv = document.querySelector(`.element[data-id="${currentTargetId}"]`);
+        if (targetDiv) targetDiv.classList.add('target-blink');
+        blinkInterval = setTimeout(startElementHunt, 3000);
+    }
+}
+
+function handleQuest(id, div) {
+    if (id === currentTargetId && !div.classList.contains('stabilized')) {
+        playHevClick(); div.classList.remove('target-blink'); div.classList.add('stabilized');
+        div.style.background = "var(--orange)"; discovered++;
+        if (blinkInterval) clearTimeout(blinkInterval);
+        if (discovered < 4) setTimeout(startElementHunt, 500);
+        else setTimeout(() => {
+            document.querySelector('.table-viewport').innerHTML = `
+            <div id="logic-quest" style="padding:20px; border:1px dashed var(--orange); text-align:center;">
+                <p style="color:#00ff00;">СЕКТОР D: ИЗВЛЕКИТЕ КЛЮЧ</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                    <button class="menu-button" onclick="checkLogic('matches')">СПИЧКИ</button>
+                    <button class="menu-button" onclick="checkLogic('magnet')">МАГНИТ</button>
+                    <button class="menu-button" onclick="checkLogic('forks')">ВИЛЫ</button><button class="menu-button" onclick="checkLogic('vacuum')">ПЫЛЕСОС</button>
+                </div><p id="logic-hint"></p></div>`;
+        }, 1000);
+    }
+}
+
+function checkLogic(item) {
+    playHevClick(); const hint = document.getElementById('logic-hint');
+    if (item === 'matches') { isHayBurned = true; hint.innerHTML = "СЕНО СГОРЕЛО."; }
+    else if (item === 'magnet') {
+        if (isHayBurned) { hint.innerHTML = "КЛЮЧ НАЙДЕН!"; setTimeout(() => setState('BIOLOGY'), 2000); }
+        else hint.innerHTML = "СЕНО МЕШАЕТ!";
+    }
+}
+
+// 4. СЕКТОР B (БИОЛОГИЯ)
+function verifyBiology() {
+    playHevClick();
+    const a1 = document.getElementById('bio-1').value, a6 = document.getElementById('bio-6').value;
+    if (a1 === 'water' && a6 === 'xen') {
+        document.getElementById('bio-hint').innerHTML = "УСПЕХ!";
+        setTimeout(() => setState('SNAKE'), 2000);
+    } else document.getElementById('bio-hint').innerHTML = "ОШИБКА!";
+}
+
+// 5. СЕКТОР S (ЗМЕЙКА)
+function startSnakeGame() {
+    const canvas = document.getElementById('snakeCanvas'), ctx = canvas.getContext('2d');
+    snake = [{x: 10 * box, y: 10 * box}]; direction = "right";
+    food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
+    gameLoop = setInterval(() => {
+        snakeTimeLeft -= 0.15; if (snakeTimeLeft <= 0) { setState('GALAXY'); return; }
+        let sX = snake[0].x, sY = snake[0].y;
+        if (direction === "up") sY -= box; else if (direction === "down") sY += box;
+        else if (direction === "left") sX -= box; else if (direction === "right") sX += box;
+        if (sX === food.x && sY === food.y) {
+            food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
+            if (snake.length >= 10) { setState('GALAXY'); return; }
+        } else snake.pop();
+        let head = {x: sX, y: sY};
+        if (sX<0 || sX>=300 || sY<0 || sY>=300 || snake.some(s=>s.x===head.x && s.y===head.y)) {
+            snake = [{x: 10 * box, y: 10 * box}]; direction = "right";
+        } else {
+            snake.unshift(head); ctx.fillStyle = "black"; ctx.fillRect(0,0,300,300);
+            ctx.fillStyle = "#00ff00"; ctx.fillText("STABILITY: " + Math.ceil(snakeTimeLeft), 10, 20);
+            ctx.fillRect(food.x, food.y, box, box);
+            snake.forEach((s, i) => { ctx.fillStyle = i===0 ? "orange" : "gray"; ctx.fillRect(s.x, s.y, box, box); });
+        }
+    }, 150);
+}
+function changeDir(d) { direction = d; playHevClick(); }
+
+// 6. СЕКТОР G (ГАЛАКТИКА)
+function startGalaxyGame() {
+    kills = 0; const f = document.getElementById('galaxy-field'), s = document.getElementById('score-galaxy');
+    if (galaxyInterval) clearInterval(galaxyInterval);
+    galaxyInterval = setInterval(() => {
+        const m = document.createElement('div'); m.className = 'meteor';
+        m.style.left = Math.random() * 250 + "px"; m.style.top = "-50px"; f.appendChild(m);
+        let p = -50, fall = setInterval(() => {
+            p += 5; m.style.top = p + "px";
+            if (p > 450) { clearInterval(fall); if(m.parentNode) f.removeChild(m); }
+        }, 30);
+        m.onclick = () => {
+            playHevClick(); kills++; s.innerText = "KILLS: " + kills;
+            clearInterval(fall); f.removeChild(m);
+            if (kills >= 20) { clearInterval(galaxyInterval); setState('WIN'); }
+        };
+    }, 800);
+}
+
+// 7. СЕРВИСНЫЕ ФУНКЦИИ
+function showDetails(el) { document.getElementById('content').innerHTML = `<h2>${el.name}</h2>`; document.getElementById('details').classList.add('open'); }
+function closeDetails() { document.getElementById('details').classList.remove('open'); }
+function startTimer() {
+    let tl = 900; timerInterval = setInterval(() => {
+        tl--; let m = Math.floor(tl/60), s = tl%60;
+        document.getElementById('timer').innerText = `${m}:${s<10?'0'+s:s}`;
+        if (tl <= 0) location.reload();
+    }, 1000);
+}
+window.onload = () => setState('MENU');
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 function playHevClick() {
     if (audioContext.state === 'suspended') audioContext.resume();
