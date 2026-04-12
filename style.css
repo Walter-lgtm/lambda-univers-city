@@ -167,5 +167,36 @@ body {
     width: fit-content;
 }
 
+/* --- СЕКТОР B: БИОЛАБОРАТОРИЯ --- */
+.bio-card {
+    border: 1px solid var(--orange);
+    padding: 15px;
+    background: rgba(255, 140, 0, 0.1);
+    color: #eee;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 10px rgba(255, 140, 0, 0.05);
+}
+
+.bio-card:active { 
+    background: var(--orange); 
+    color: #000; 
+    transform: scale(0.95);
+}
+
+#bio-hint {
+    min-height: 40px;
+    margin-top: 20px;
+    padding: 10px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
 @keyframes typing { from { width: 0 } to { width: 100% } }
 @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--orange); } }
