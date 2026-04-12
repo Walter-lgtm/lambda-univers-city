@@ -15,47 +15,32 @@ const questTargets = [8, 26, 47, 79];
 let discovered = 0;
 
 function setState(stateName) {
-    // 1. Оживляем звук (для смартфонов)
     if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
         audioContext.resume();
     }
 
-    // 2. Список всех наших экранов (дивов)
     const screens = ['state-menu', 'state-game', 'state-win', 'state-biology'];
-    
-    // Скрываем все экраны разом
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
 
-    // 3. Логика переключения
     if (stateName === 'MENU') {
         const menu = document.getElementById('state-menu');
         if (menu) menu.style.display = 'flex';
     } 
     else if (stateName === 'GAME') {
         const nickInput = document.getElementById('player-name');
-        const nickname = nickInput ? nickInput.value : "";
-
-        if (!nickname) {
-            alert("ВВЕДИТЕ ВАШ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!");
-            const menu = document.getElementById('state-menu');
-            if (menu) menu.style.display = 'flex';
+        if (!nickInput || !nickInput.value) {
+            alert("ВВЕДИТЕ ВАШ НИКНЕЙМ!");
+            document.getElementById('state-menu').style.display = 'flex';
             return;
         }
-
-        const gameScreen = document.getElementById('state-game');
-        if (gameScreen) gameScreen.style.display = 'block';
-
-        // Важно: строим таблицу только если она пустая
-        const table = document.getElementById('table');
-        if (table && table.innerHTML.trim() === "") {
+        document.getElementById('state-game').style.display = 'block';
+        if (document.getElementById('table').innerHTML.trim() === "") {
             buildTable();
         }
-        
-        // Запускаем таймер (проверь, что функция startTimer у тебя есть ниже)
-        if (typeof startTimer === 'function') startTimer();
+        startTimer();
     } 
     else if (stateName === 'BIOLOGY') {
         const bio = document.getElementById('state-biology');
@@ -64,10 +49,10 @@ function setState(stateName) {
     else if (stateName === 'WIN') {
         const win = document.getElementById('state-win');
         if (win) win.style.display = 'flex';
-        if (typeof timerInterval !== 'undefined') clearInterval(timerInterval);
-        if (typeof sendDataToGoogle === 'function') sendDataToGoogle();
+        if (timerInterval) clearInterval(timerInterval);
+        sendDataToGoogle();
     }
-}
+} // <--- ПРОВЕРЬ ЭТУ СКОБКУ!
 function buildTable() {
     const table = document.getElementById('table');
     elements.forEach(el => {
