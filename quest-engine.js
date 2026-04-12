@@ -255,16 +255,36 @@ function changeDir(d) {
     if (d === 'right' && direction !== 'left') direction = 'right';
 }
 
-function drawSnake() {
+let snake, food, direction, gameLoop;
+let box = 20; // Немного увеличим для мобилок
+
+function startSnakeGame() {
+    // Инициализируем холст только когда игра РЕАЛЬНО начинается
+    const canvas = document.getElementById('snakeCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    snake = [{x: 10 * box, y: 10 * box}];
+    food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
+    direction = "right";
+    
+    if (gameLoop) clearInterval(gameLoop);
+    gameLoop = setInterval(() => drawSnake(ctx, canvas), 150);
+}
+
+// Функцию рисования тоже немного подправим для стабильности
+function drawSnake(ctx, canvas) {
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, 300, 300);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = (i === 0) ? "#ff8c00" : "#555"; // Голова оранжевая, хвост серый
+        ctx.fillStyle = (i === 0) ? "#ff8c00" : "#555";
         ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
     }
 
-    ctx.fillStyle = "#00ff00"; // Цвет изотопа
+    ctx.fillStyle = "#00ff00";
     ctx.fillRect(food.x, food.y, box, box);
 
     let snakeX = snake[0].x;
@@ -275,12 +295,12 @@ function drawSnake() {
     if (direction === "left") snakeX -= box;
     if (direction === "right") snakeX += box;
 
-    // Проверка поедания
     if (snakeX === food.x && snakeY === food.y) {
-        food = { x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box };
-        if (snake.length >= 10) { // Нужно собрать 10 штук
+        playHevClick(); // Звук при поедании!
+        food = { x: Math.floor(Math.random() * 14 + 1) * box, y: Math.floor(Math.random() * 14 + 1) * box };
+        if (snake.length >= 10) {
             clearInterval(gameLoop);
-            alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН. ПЕРЕХОД К ФИНАЛУ...");
+            alert("ОБРАЗЕЦ СТАБИЛИЗИРОВАН!");
             setState('WIN');
         }
     } else {
@@ -289,11 +309,12 @@ function drawSnake() {
 
     let newHead = { x: snakeX, y: snakeY };
 
-    // Столкновение со стенами или собой
-    if (snakeX < 0 || snakeX >= 300 || snakeY < 0 || snakeY >= 300 || collision(newHead, snake)) {
+    if (snakeX < 0 || snakeX >= canvas.width || snakeY < 0 || snakeY >= canvas.height || collision(newHead, snake)) {
         clearInterval(gameLoop);
-        alert("ОШИБКА: ОБЪЕКТ ПОГИБ. ПЕРЕЗАПУСК СЕКТОРА...");
+        playHevClick();
+        alert("ОШИБКА: ОБЪЕКТ ПОГИБ. ПЕРЕЗАПУСК...");
         startSnakeGame();
+        return;
     }
 
     snake.unshift(newHead);
