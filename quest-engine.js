@@ -198,6 +198,29 @@ function startTimer() {
         if (tl <= 0) location.reload();
     }, 1000);
 }
+function sendDataToGoogle() {
+    const nickInput = document.getElementById('player-name');
+    const timerDisplay = document.getElementById('timer');
+    
+    const nick = nickInput ? nickInput.value : "Unknown_Padawan";
+    const timeLeft = timerDisplay ? timerDisplay.innerText : "00:00";
+    
+    // СЮДА ВСТАВИШЬ ССЫЛКУ, КОТОРУЮ ПОЛУЧИШЬ В GOOGLE
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwOtFiGt0u-y0hwpL2UfQelGX25mybXuxT6vwr-qgLYllHvOJvL_KXv2ffGYC3VgWKP3w/exec'; 
 
+    const data = {
+        nickname: nick,
+        time: timeLeft
+    };
+
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(() => console.log("Данные переданы Наблюдателю. Эксперимент завершен."))
+    .catch(error => console.error("Ошибка связи с порталом:", error));
+}
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
