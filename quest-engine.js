@@ -53,21 +53,32 @@ function setState(stateName) {
             buildTable(); 
         }
         
-        // ЗАПУСК ВСЕХ СИСТЕМ СЕКТОРА C
-        startTimer();        
-        startElementHunt();   
-    } 
+        else if (stateName === 'BIOLOGY') {
+        const bio = document.getElementById('state-biology');
+        if (bio) bio.style.display = 'block';
+    }
+    else if (stateName === 'SNAKE') {
+        const snakeScreen = document.getElementById('state-snake');
+        if (snakeScreen) {
+            snakeScreen.style.display = 'block';
+            startSnakeGame(); // Запускаем змейку
+        }
+    }
+    else if (stateName === 'GALAXY') {
+        const galaxyScreen = document.getElementById('state-galaxy');
+        if (galaxyScreen) {
+            galaxyScreen.style.display = 'block';
+            startGalaxyGame(); // Запускаем галактику
+        }
+    }
     else if (stateName === 'WIN') {
         // Остановка всех фоновых процессов
         if (timerInterval) clearInterval(timerInterval);
         if (gameLoop) clearInterval(gameLoop);
         if (blinkInterval) clearTimeout(blinkInterval); 
+        if (typeof galaxyInterval !== 'undefined') clearInterval(galaxyInterval);
         
-        // Переход к финальному экрану
-        document.getElementById('state-game').style.display = 'none';
         document.getElementById('state-win').style.display = 'flex';
-        
-        // Отправка данных в КиберАсгард
         sendDataToGoogle();
     }
 }
