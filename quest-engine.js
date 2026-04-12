@@ -307,3 +307,9 @@ function startElementHunt() {
 }
 
 window.onload = () => setState('MENU');
+// Принудительная разблокировка звука для iOS/Android при любом первом тапе по экрану
+document.body.addEventListener('touchstart', function() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, {once: true}); // Сработает только один раз
