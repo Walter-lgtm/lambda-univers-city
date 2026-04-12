@@ -23,13 +23,25 @@ let snakeTimeLeft = 120; // Таймер змейки (не сбрасывает
 
 // --- 2. МАШИНА СОСТОЯНИЙ ---
 function setState(stateName) {
-    if (audioContext.state === 'suspended') audioContext.resume();
+    // 1. Оживляем звук
+    if (typeof audioContext !== 'undefined' && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+
+    // 2. Останавливаем ВСЕ игровые циклы (важно для сброса зацикливания)
+    if (gameLoop) clearInterval(gameLoop);
+    if (timerInterval && stateName === 'WIN') clearInterval(timerInterval);
+
+    // 3. Список всех экранов
     const screens = ['state-menu', 'state-game', 'state-win', 'state-biology', 'state-snake'];
+    
+    // Скрываем всё
     screens.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
     });
 
+    // 4. Логика переходов
     if (stateName === 'MENU') {
         document.getElementById('state-menu').style.display = 'flex';
     } 
@@ -45,12 +57,11 @@ function setState(stateName) {
     }
     else if (stateName === 'SNAKE') {
         document.getElementById('state-snake').style.display = 'block';
-        startSnakeGame();
+        startSnakeGame(); // Запуск змейки
     }
     else if (stateName === 'WIN') {
         document.getElementById('state-win').style.display = 'flex';
-        if (timerInterval) clearInterval(timerInterval);
-        if (gameLoop) clearInterval(gameLoop);
+        sendDataToGoogle(); 
     }
 }
 
