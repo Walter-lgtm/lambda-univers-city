@@ -44,27 +44,31 @@ function setState(stateName) {
     } 
     else if (stateName === 'GAME') {
         const nick = document.getElementById('player-name').value;
-        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ!");
+        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!");
+        
         document.getElementById('state-game').style.display = 'block';
-        if (document.getElementById('table').innerHTML.trim() === "") buildTable();
-        startTimer();
+        
+        // Построение таблицы, если она пустая
+        if (document.getElementById('table').innerHTML.trim() === "") {
+            buildTable(); 
+        }
+        
+        // ЗАПУСК ВСЕХ СИСТЕМ СЕКТОРА C
+        startTimer();        
+        startElementHunt();   
     } 
-    else if (stateName === 'BIOLOGY') {
-        document.getElementById('state-biology').style.display = 'block';
-    }
-    else if (stateName === 'SNAKE') {
-        document.getElementById('state-snake').style.display = 'block';
-        startSnakeGame();
-    }
-    else if (stateName === 'GALAXY') {
-        document.getElementById('state-galaxy').style.display = 'block';
-        startGalaxyGame();
-    }
     else if (stateName === 'WIN') {
-        document.getElementById('state-win').style.display = 'flex';
+        // Остановка всех фоновых процессов
         if (timerInterval) clearInterval(timerInterval);
-        // ВАЖНО: Мы скрываем контейнер state-game, чтобы сено не всплыло!
-        document.getElementById('state-game').style.display = 'none'; 
+        if (gameLoop) clearInterval(gameLoop);
+        if (blinkInterval) clearTimeout(blinkInterval); 
+        
+        // Переход к финальному экрану
+        document.getElementById('state-game').style.display = 'none';
+        document.getElementById('state-win').style.display = 'flex';
+        
+        // Отправка данных в КиберАсгард
+        sendDataToGoogle();
     }
 }
 
@@ -73,6 +77,7 @@ function buildTable() {
     const table = document.getElementById('table');
     elements.forEach(el => {
         const div = document.createElement('div');
+        div.setAttribute('data-id', el.n);
         const isQuest = questTargets.includes(el.n);
         div.className = 'element' + (isQuest ? ' active-quest' : '');
         div.style.gridColumn = el.x;
@@ -250,6 +255,38 @@ function startTimer() {
         if (display) display.innerText = `${m}:${s<10?'0'+s:s}`;
         if (timeLeft <= 0) location.reload();
     }, 1000);
+}
+
+let currentTargetId = null;
+let blinkInterval;
+
+function startElementHunt() {
+    // 1. Находим все квестовые элементы, которые ещё НЕ стабилизированы
+    const elementsOnTable = document.querySelectorAll('.element');
+    const remaining = [];
+    
+    elementsOnTable.forEach(div => {
+        const id = parseInt(div.getAttribute('data-id'));
+        if (questTargets.includes(id) && !div.classList.contains('stabilized')) {
+            remaining.push(id);
+        }
+    });
+
+    // 2. Убираем мигание у всех
+    elementsOnTable.forEach(el => el.classList.remove('target-blink'));
+
+    // 3. Если есть кого ловить — запускаем мигалку
+    if (remaining.length > 0) {
+        currentTargetId = remaining[Math.floor(Math.random() * remaining.length)];
+        const targetDiv = document.querySelector(`.element[data-id="${currentTargetId}"]`);
+        
+        if (targetDiv) {
+            targetDiv.classList.add('target-blink');
+            // Перебрасываем мигалку на другой элемент через 3 секунды
+            if (blinkInterval) clearTimeout(blinkInterval);
+            blinkInterval = setTimeout(startElementHunt, 3000); 
+        }
+    }
 }
 
 window.onload = () => setState('MENU');
