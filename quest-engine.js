@@ -51,16 +51,18 @@ function setState(stateName) {
     else if (stateName === 'GAME') {
         const nickInput = document.getElementById('player-name');
         const nick = nickInput ? nickInput.value : "";
-        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ ДЛЯ АВТОРИЗАЦИИ!");
+        if (!nick) return alert("ВВЕДИТЕ НИКНЕЙМ!");
         
-        const gameS = document.getElementById('state-game');
-        if (gameS) gameS.style.display = 'block';
+        // Сначала показываем экран (это браузер разрешит всегда)
+        document.getElementById('state-game').style.display = 'block';
         
-        if (document.getElementById('table').innerHTML.trim() === "") buildTable();
-        
-        startTimer();        
-        startElementHunt();   
-    } 
+        // Даем смартфону 100мс "продышаться" и запускаем остальное
+        setTimeout(() => {
+            if (document.getElementById('table').innerHTML.trim() === "") buildTable();
+            startTimer();        
+            startElementHunt();
+        }, 100);
+    }
     else if (stateName === 'BIOLOGY') {
         const bio = document.getElementById('state-biology');
         if (bio) bio.style.display = 'block';
