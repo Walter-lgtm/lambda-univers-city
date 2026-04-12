@@ -35,20 +35,35 @@
         </div>
     </div>
 
-    <div id="state-biology" style="display:none; text-align:center; padding: 20px;">
+    <div id="state-biology" style="display:none; text-align:center; padding: 10px;">
     <h2 style="color:var(--orange)">СЕКТОР B: БИОЛАБОРАТОРИЯ</h2>
-    <p style="color:#00ff00; font-size:0.8rem;">РАСПРЕДЕЛИТЕ ОБЪЕКТЫ ПО СРЕДАМ ОБИТАНИЯ</p>
+    <p style="color:#00ff00; font-size:0.8rem;">ОПРЕДЕЛИТЕ СРЕДУ ОБИТАНИЯ ДЛЯ КАЖДОГО ОБЪЕКТА</p>
     
-    <div id="bio-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-        <!-- Карточки организмов -->
-        <div class="bio-card" onclick="checkBio('water')">ДЕЛЬФИН</div>
-        <div class="bio-card" onclick="checkBio('soil')">КРОТ</div>
-        <div class="bio-card" onclick="checkBio('air')">ОРЕЛ</div>
-        <div class="bio-card" onclick="checkBio('land')">ВЕРБЛЮД</div>
-        <div class="bio-card" onclick="checkBio('host')">ЧЕРВЬ</div>
-        <div class="bio-card" style="border-color:red; color:red;" onclick="checkBio('alien')">ГОЛОВОКРАБ</div>
+    <div id="bio-grid" style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
+        <!-- Карточка организма -->
+        <div class="bio-row" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,140,0,0.1); padding:10px; border:1px solid #333;">
+            <span>ДЕЛЬФИН</span>
+            <select class="bio-select" id="bio-1">
+                <option value="none">?</option>
+                <option value="water">ВОДНАЯ</option>
+                <option value="land">НАЗЕМНАЯ</option>
+                <option value="xen">XEN</option>
+            </select>
+        </div>
+        <!-- Повтори такие блоки для других (Крот, Орел, Верблюд, Червь, Головокраб) -->
+        <div class="bio-row" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,140,0,0.1); padding:10px; border:1px solid #333;">
+            <span>ГОЛОВОКРАБ</span>
+            <select class="bio-select" id="bio-6" style="color:var(--orange)">
+                <option value="none">?</option>
+                <option value="water">ВОДНАЯ</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
+                <option value="xen">XEN</option>
+            </select>
+        </div>
     </div>
-    <p id="bio-hint" style="margin-top:20px; font-style:italic;"></p>
+
+    <button class="menu-button" onclick="verifyBiology()" style="margin-top:20px;">ПОДТВЕРДИТЬ АНАЛИЗ</button>
+    <p id="bio-hint" style="color:red;"></p>
 </div>
 
     <!-- 3. ЭКРАН ПОБЕДЫ -->
