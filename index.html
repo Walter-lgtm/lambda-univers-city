@@ -37,35 +37,79 @@
 
     <div id="state-biology" style="display:none; text-align:center; padding: 10px;">
     <h2 style="color:var(--orange)">СЕКТОР B: БИОЛАБОРАТОРИЯ</h2>
-    <p style="color:#00ff00; font-size:0.8rem;">ОПРЕДЕЛИТЕ СРЕДУ ОБИТАНИЯ ДЛЯ КАЖДОГО ОБЪЕКТА</p>
+    <p style="color:#00ff00; font-size:0.7rem; margin-bottom:15px;">РАСПРЕДЕЛИТЕ ОБЪЕКТЫ ПО СРЕДАМ ОБИТАНИЯ</p>
     
-    <div id="bio-grid" style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 15px;">
-        <!-- Карточка организма -->
-        <div class="bio-row" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,140,0,0.1); padding:10px; border:1px solid #333;">
+    <div id="bio-grid" style="display: flex; flex-direction: column; gap: 8px; max-height: 60vh; overflow-y: auto; padding: 5px;">
+        
+        <!-- КАРТОЧКИ -->
+        <div class="bio-row">
             <span>ДЕЛЬФИН</span>
             <select class="bio-select" id="bio-1">
                 <option value="none">?</option>
                 <option value="water">ВОДНАЯ</option>
-                <option value="land">НАЗЕМНАЯ</option>
+                <option value="land-air">НАЗЕМНО-ВОЗД.</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
                 <option value="xen">XEN</option>
             </select>
         </div>
-        <!-- Повтори такие блоки для других (Крот, Орел, Верблюд, Червь, Головокраб) -->
-        <div class="bio-row" style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,140,0,0.1); padding:10px; border:1px solid #333;">
-            <span>ГОЛОВОКРАБ</span>
-            <select class="bio-select" id="bio-6" style="color:var(--orange)">
+
+        <div class="bio-row">
+            <span>ОРЕЛ</span>
+            <select class="bio-select" id="bio-2">
+                <option value="none">?</option>
+                <option value="water">ВОДНАЯ</option>
+                <option value="land-air">НАЗЕМНО-ВОЗД.</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
+                <option value="xen">XEN</option>
+            </select>
+        </div>
+
+        <div class="bio-row">
+            <span>КРОТ</span>
+            <select class="bio-select" id="bio-3">
+                <option value="none">?</option>
+                <option value="water">ВОДНАЯ</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
+                <option value="land-air">НАЗЕМНО-ВОЗД.</option>
+                <option value="xen">XEN</option>
+            </select>
+        </div>
+
+        <div class="bio-row">
+            <span>ЧЕРВЬ</span>
+            <select class="bio-select" id="bio-4">
+                <option value="none">?</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
+                <option value="organism">ОРГАНИЗМЕННАЯ</option>
+                <option value="water">ВОДНАЯ</option>
+            </select>
+        </div>
+
+        <div class="bio-row">
+            <span>ВЕРБЛЮД</span>
+            <select class="bio-select" id="bio-5">
+                <option value="none">?</option>
+                <option value="land-air">НАЗЕМНО-ВОЗД.</option>
+                <option value="water">ВОДНАЯ</option>
+                <option value="soil">ПОЧВЕННАЯ</option>
+            </select>
+        </div>
+
+        <div class="bio-row" style="border-color: var(--orange);">
+            <span style="color: var(--orange);">ГОЛОВОКРАБ</span>
+            <select class="bio-select" id="bio-6" style="border-color: red;">
                 <option value="none">?</option>
                 <option value="water">ВОДНАЯ</option>
                 <option value="soil">ПОЧВЕННАЯ</option>
                 <option value="xen">XEN</option>
             </select>
         </div>
+
     </div>
 
-    <button class="menu-button" onclick="verifyBiology()" style="margin-top:20px;">ПОДТВЕРДИТЬ АНАЛИЗ</button>
-    <p id="bio-hint" style="color:red;"></p>
+    <button class="menu-button" onclick="verifyBiology()" style="margin-top:15px; width: 100%;">ПОДТВЕРДИТЬ АНАЛИЗ</button>
+    <p id="bio-hint" style="font-size: 0.8rem; margin-top: 10px;"></p>
 </div>
-
     <!-- 3. ЭКРАН ПОБЕДЫ -->
     <div id="state-win" style="display:none">
     <div class="lambda-logo" style="width:80px; height:80px; font-size:40px;">λ</div>
