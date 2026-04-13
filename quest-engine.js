@@ -304,76 +304,121 @@ function openVault(type) {
         <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
     } else if (type === 'tetris') {
         container.innerHTML = `
-            <h3 style="color:var(--orange)">МОЛЕКУЛЯРНЫЙ СИНТЕЗ</h3>
-            <canvas id="tetrisCanvas" width="200" height="400" style="border:2px solid var(--orange); margin: 0 auto; display:block;"></canvas>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:10px;">
-                <button class="menu-button" onclick="moveTetris('L')">◀</button>
-                <button class="menu-button" onclick="moveTetris('D')">▼</button>
-                <button class="menu-button" onclick="moveTetris('R')">▶</button>
-            </div>
-        `;
+    <h3 style="color:var(--orange)">МОЛЕКУЛЯРНЫЙ СИНТЕЗ</h3>
+    <canvas id="tetrisCanvas" width="200" height="400" style="border:2px solid var(--orange); margin: 0 auto; display:block; background:#000;"></canvas>
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:15px;">
+        <button class="menu-button" onclick="moveTetris('L')">◀</button>
+        <button class="menu-button" onclick="moveTetris('W')">🔄</button>
+        <button class="menu-button" onclick="moveTetris('D')">▼</button>
+        <button class="menu-button" onclick="moveTetris('R')">▶</button>
+    </div>
+`;
         setTimeout(startTetris, 100); // Даем время отрисовать Canvas
     }
 }
 
-// ПЕРЕМЕННЫЕ ТЕТРИСА
-let tCanvas, tCtx, tInterval;
-const tRow = 20, tCol = 10, tSq = 20; // 200x400 пикселей
+// --- МОЛЕКУЛЯРНЫЙ ТЕТРИС (СЕКТОР X) ---
+let tBoard, tPiece, tInterval, tCtx, tCanvas;
+const ROWS = 20, COLS = 10, SQ = 20;
 
-// Цвета "атомов" (молекулярный стиль)
-const tColors = ["#ff8c00", "#00ff00", "#00ffff", "#ff00ff", "#ffff00"];
+// Классические фигуры (тетрамино) в виде матриц
+const PIECES = [
+    [[1,1,1,1]], // I
+    [[1,1],[1,1]], // O
+    [[0,1,1],[1,1,0]], // S
+    [[1,1,0],[0,1,1]], // Z
+    [[0,1,0],[1,1,1]], // T
+    [[1,0,0],[1,1,1]], // L
+    [[0,0,1],[1,1,1]]  // J
+];
 
 function startTetris() {
     tCanvas = document.getElementById('tetrisCanvas');
     if (!tCanvas) return;
     tCtx = tCanvas.getContext('2d');
+    tBoard = Array.from({length: ROWS}, () => Array(COLS).fill("black"));
 
-    let board = [];
-    for(let r = 0; r < tRow; r++){
-        board[r] = [];
-        for(let c = 0; c < tCol; c++) board[r][c] = "black";
+    function newPiece() {
+        const shape = PIECES[Math.floor(Math.random() * PIECES.length)];
+        const color = ["#ff8c00", "#00ff00", "#00ffff", "#ff00ff", "#ffff00"][Math.floor(Math.random()*5)];
+        return { shape, color, x: 3, y: 0 };
     }
 
-    function drawSquare(x, y, color){
+    tPiece = newPiece();
+
+    function drawSq(x, y, color) {
         tCtx.fillStyle = color;
-        tCtx.fillRect(x*tSq, y*tSq, tSq, tSq);
-        tCtx.strokeStyle = "#222";
-        tCtx.strokeRect(x*tSq, y*tSq, tSq, tSq);
+        tCtx.fillRect(x*SQ, y*SQ, SQ, SQ);
+        tCtx.strokeStyle = "#111";
+        tCtx.strokeRect(x*SQ, y*SQ, SQ, SQ);
     }
 
-    function drawBoard(){
-        for(let r = 0; r < tRow; r++){
-            for(let c = 0; c < tCol; c++) drawSquare(c, r, board[r][c]);
+    function draw() {
+        tCtx.fillStyle = "black";
+        tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+        for(let r=0; r<ROWS; r++) {
+            for(let c=0; c<COLS; c++) {
+                if(tBoard[r][c] !== "black") drawSq(c, r, tBoard[r][c]);
+            }
         }
+        tPiece.shape.forEach((row, dy) => {
+            row.forEach((value, dx) => {
+                if(value) drawSq(tPiece.x + dx, tPiece.y + dy, tPiece.color);
+            });
+        });
     }
 
-    // Простая фигура (тетрамино "O" и "I")
-    let piece = {
-        pos: {x: 4, y: 0},
-        color: tColors[Math.floor(Math.random() * tColors.length)]
+    function collision(nx, ny, shape) {
+        for(let r=0; r<shape.length; r++) {
+            for(let c=0; c<shape[r].length; c++) {
+                if(!shape[r][c]) continue;
+                let newX = nx + c, newY = ny + r;
+                if(newX < 0 || newX >= COLS || newY >= ROWS) return true;
+                if(newY < 0) continue;
+                if(tBoard[newY][newX] !== "black") return true;
+            }
+        }
+        return false;
+    }
+
+    window.moveTetris = (dir) => {
+        if(dir === 'L' && !collision(tPiece.x-1, tPiece.y, tPiece.shape)) tPiece.x--;
+        if(dir === 'R' && !collision(tPiece.x+1, tPiece.y, tPiece.shape)) tPiece.x++;
+        if(dir === 'D') {
+            if(!collision(tPiece.x, tPiece.y+1, tPiece.shape)) tPiece.y++;
+            else lock();
+        }
+        if(dir === 'W') { // ПОВОРОТ
+            let next = tPiece.shape[0].map((_, i) => tPiece.shape.map(row => row[i]).reverse());
+            if(!collision(tPiece.x, tPiece.y, next)) tPiece.shape = next;
+        }
+        draw();
     };
 
-    function drop(){
-        piece.pos.y++;
-        if(piece.pos.y >= tRow){
-            piece.pos.y = 0;
-            piece.color = tColors[Math.floor(Math.random() * tColors.length)];
+    function lock() {
+        tPiece.shape.forEach((row, dy) => {
+            row.forEach((value, dx) => {
+                if(value) {
+                    if(tPiece.y + dy < 0) { alert("СИНТЕЗ ПРЕРВАН"); startTetris(); return; }
+                    tBoard[tPiece.y + dy][tPiece.x + dx] = tPiece.color;
+                }
+            });
+        });
+        for(let r=ROWS-1; r>=0; r--) {
+            if(tBoard[r].every(cell => cell !== "black")) {
+                tBoard.splice(r, 1);
+                tBoard.unshift(Array(COLS).fill("black"));
+                playHevClick();
+            }
         }
-        drawBoard();
-        drawSquare(piece.pos.x, piece.pos.y, piece.color);
+        tPiece = newPiece();
     }
 
     if(tInterval) clearInterval(tInterval);
-    tInterval = setInterval(drop, 500);
-
-    // УПРАВЛЕНИЕ ДЛЯ СМАРТФОНА (добавим в HTML под канвас)
-    window.moveTetris = (dir) => {
-        if(dir === 'L' && piece.pos.x > 0) piece.pos.x--;
-        if(dir === 'R' && piece.pos.x < tCol-1) piece.pos.x++;
-        if(dir === 'D' && piece.pos.y < tRow-1) piece.pos.y++;
-        drawBoard();
-        drawSquare(piece.pos.x, piece.pos.y, piece.color);
-    };
+    tInterval = setInterval(() => {
+        if(!collision(tPiece.x, tPiece.y+1, tPiece.shape)) tPiece.y++; else lock();
+        draw();
+    }, 600);
 }
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
