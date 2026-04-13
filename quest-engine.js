@@ -478,6 +478,7 @@ function showVPRResult() {
         <div style="font-size:3rem; color:var(--orange); margin: 15px 0; border: 2px solid var(--orange); display:inline-block; padding: 5px 25px;">${grade}</div>
         <p style="font-size:0.7rem;">Верных ответов: ${vprScore} из 5</p>
         <button class="menu-button" onclick="startVPR()" style="margin-top:15px;">ПЕРЕСДАЧА</button>`;
-}
+} // <--- ВОТ ЭТУ СКОБКУ ТЫ ПОТЕРЯЛ! ДОБАВЬ ЕЁ!
+
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
