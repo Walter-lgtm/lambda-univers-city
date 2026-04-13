@@ -294,21 +294,6 @@ function openVault(type) {
     container.style.display = 'block';
     container.innerHTML = ""; // Чистим
 
-    else if (type === 'video') {
-        container.innerHTML = `
-            <h3 style="color:var(--orange)">АРХИВ: ВИДЕОУРОКИ (6 КЛАСС)</h3>
-            <div id="video-player-box" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid var(--orange); background:#000; margin-bottom:15px; display:none;">
-                <iframe id="main-video-frame" src="" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allowfullscreen></iframe>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/deb981889db74e1b08d77f0ab8c71afd/?p=3soCTNjB1rXTUPk1-fDWEA')">● УРОК 1: Обмен веществ</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/545fbd5aaa381cd44ac387b45eae4b4d/?p=3eyzry8BMbsXcsbMyj2x9A')">● УРОК 2: Удобрения</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/140c53a4efcf003e9caf639d0a367335/?p=CqD7a89NZmRMYQlneLqgaw')">● УРОК 3: Фотосинтез</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/2b633bd510815146b08593c031dfbb4e/?p=aCrCsXmgN3uI5f8OFyTGmg')">● УРОК 4: Фотосинтез ч.2</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/39ccb9157179b73dff0447ae747b3c38/?p=jQ6c8Obmc8ELujqsj1tb9g')">● УРОК 5: Гетеротрофное питание</button>
-            </div>
-        `;
-    }
 }
     } else if (type === 'vpr') {
         container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
@@ -446,17 +431,51 @@ function closeVaultContent() {
     // 3. Возвращаемся к выбору кейсов
     setState('VAULT');
 }
-function loadVideo(url) {
+// --- БИОЛОГИЧЕСКИЙ СИМУЛЯТОР ВПР ---
+let currentQuestion = 0;
+let vprScore = 0;
+const vprQuestions = [
+    { q: "Основной органоид клетки, содержащий ДНК?", a: ["Ядро", "Цитоплазма", "Рибосома"], correct: 0 },
+    { q: "Процесс образования органических веществ на свету?", a: ["Дыхание", "Фотосинтез", "Испарение"], correct: 1 },
+    { q: "Группа клеток, сходных по строению и функциям?", a: ["Орган", "Ткань", "Организм"], correct: 1 },
+    { q: "Вещество, окрашивающее лист в зеленый цвет?", a: ["Крахмал", "Хлорофилл", "Йод"], correct: 1 },
+    { q: "Органы дыхания растений на поверхности листа?", a: ["Устьица", "Корни", "Почки"], correct: 0 }
+];
+
+function startVPR() {
     playHevClick();
-    const box = document.getElementById('video-player-box');
-    const frame = document.getElementById('main-video-frame');
-    
-    if (box && frame) {
-        box.style.display = 'block'; // Показываем плеер
-        frame.src = url;             // Загружаем видео
-        // Прокручиваем экран к видео, чтобы было удобно смотреть
-        box.scrollIntoView({behavior: "smooth"});
-    }
+    currentQuestion = 0;
+    vprScore = 0;
+    document.getElementById('vault-content').style.display = 'block';
+    showQuestion();
+}
+
+function showQuestion() {
+    const container = document.getElementById('vault-content');
+    const quest = vprQuestions[currentQuestion];
+    container.innerHTML = `
+        <p style="color:#888; font-size:0.7rem;">ТЕСТ: ВОПРОС ${currentQuestion + 1}/${vprQuestions.length}</p>
+        <p style="color:var(--orange); font-weight:bold; margin-bottom:15px;">${quest.q}</p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            ${quest.a.map((ans, i) => `<button class="menu-button" style="font-size:0.8rem;" onclick="checkVPR(${i})">${ans}</button>`).join('')}
+        </div>`;
+}
+
+function checkVPR(answer) {
+    if (answer === vprQuestions[currentQuestion].correct) vprScore++;
+    currentQuestion++;
+    if (currentQuestion < vprQuestions.length) showQuestion();
+    else showVPRResult();
+}
+
+function showVPRResult() {
+    const container = document.getElementById('vault-content');
+    let grade = vprScore === 5 ? 5 : vprScore === 4 ? 4 : vprScore === 3 ? 3 : 2;
+    container.innerHTML = `
+        <h3 style="color:#00ff00;">РЕЗУЛЬТАТ СИНХРОНИЗАЦИИ</h3>
+        <div style="font-size:3rem; color:var(--orange); margin: 15px 0; border: 2px solid var(--orange); display:inline-block; padding: 5px 25px;">${grade}</div>
+        <p style="font-size:0.7rem;">Верных ответов: ${vprScore} из 5</p>
+        <button class="menu-button" onclick="startVPR()" style="margin-top:15px;">ПЕРЕСДАЧА</button>`;
 }
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
