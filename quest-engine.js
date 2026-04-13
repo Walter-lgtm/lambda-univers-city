@@ -273,5 +273,37 @@ function sendDataToGoogle() {
     });
 }
 
+function unlockSecretSector() {
+    const code = document.getElementById('final-secret-code').value.toUpperCase();
+    if (code === 'HL-SINGULARITY-106') {
+        playHevClick();
+        alert("ДОСТУП РАЗРЕШЕН. ПРИВЕТСТВУЮ, ПАДАВАН.");
+        setState('VAULT');
+    } else {
+        alert("ДОСТУП ЗАПРЕЩЕН. НЕВЕРНЫЙ КОД.");
+    }
+}
+
+function openVault(type) {
+    playHevClick();
+    const container = document.getElementById('vault-content');
+    container.style.display = 'block';
+    container.innerHTML = ""; // Чистим
+
+    if (type === 'video') {
+        // Вставь сюда ссылки на свои видео (iframe с YouTube или просто ссылки)
+        container.innerHTML = `<h3>БАЗА ВИДЕОУРОКОВ</h3>
+        <p><a href="ССЫЛКА_НА_ТВОЕ_ВИДЕО" target="_blank" style="color:#00ff00;">Урок 1: Строение клетки</a></p>
+        <p><a href="ССЫЛКА_2" target="_blank" style="color:#00ff00;">Урок 2: Ткани</a></p>`;
+    } else if (type === 'vpr') {
+        container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
+        <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
+    } else if (type === 'tetris') {
+        container.innerHTML = `<h3>ТЕТРИС: СИНХРОНИЗАЦИЯ</h3>
+        <canvas id="tetrisCanvas" width="200" height="400" style="border:1px solid var(--orange)"></canvas>
+        <p>Используйте стрелки (пропишем управление ниже)</p>`;
+        startTetris(); // Эту функцию мы напишем следующей
+    }
+}
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
