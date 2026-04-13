@@ -305,11 +305,11 @@ function openVault(type) {
 
             <!-- СПИСОК УРОКОВ -->
             <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_1')">● УРОК 1: Строение клетки</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_2')">● УРОК 2: Ткани растений</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_3')">● УРОК 3: Органы растений</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_4')">● УРОК 4: Жизнедеятельность</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_5')">● УРОК 5: Природные зоны</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_1')">● УРОК 1: Обмен веществ – главный признак жизни</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_2')">● УРОК 2: Удобрения и почвенное питание растений</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_3')">● УРОК 3: Фотосинтез</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_4')">● УРОК 4: Фотосинтез</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_5')">● УРОК 5: Гетеротрофное питание</button>
             </div>
         `;
     }
