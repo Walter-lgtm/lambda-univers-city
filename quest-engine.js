@@ -294,27 +294,25 @@ function openVault(type) {
     container.style.display = 'block';
     container.innerHTML = ""; // Чистим
 
-    else if (type === 'video') {
-    container.innerHTML = `
-        <h3 style="color:var(--orange)">АРХИВ: ВИДЕОУРОКИ (6 КЛАСС)</h3>
-        
-        <!-- КОНТЕЙНЕР ДЛЯ ВИДЕО (Адаптив 16:9) -->
-        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid var(--orange); background:#000;">
-            <iframe 
-                src="ТВОЯ_ССЫЛКА_ИЗ_RUTUBE_ЗДЕСЬ" 
-                style="position:absolute; top:0; left:0; width:100%; height:100%;" 
-                frameborder="0" 
-                allow="clipboard-write; autoplay" 
-                webkitAllowFullScreen mozallowfullscreen allowFullScreen>
-            </iframe>
-        </div>
+    else  if (type === 'video') {
+        container.innerHTML = `
+            <h3 style="color:var(--orange)">АРХИВ: ВИДЕОУРОКИ (6 КЛАСС)</h3>
+            
+            <!-- ПЛЕЕР (Изначально пустой) -->
+            <div id="video-player-box" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid var(--orange); background:#000; margin-bottom:15px; display:none;">
+                <iframe id="main-video-frame" src="" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allowfullscreen></iframe>
+            </div>
 
-        <div style="margin-top:15px; text-align:left; font-size:0.8rem; color:#00ff00;">
-            <p>> ОБЪЕКТ: СТРОЕНИЕ РАСТИТЕЛЬНОЙ КЛЕТКИ</p>
-            <p>> СТАТУС: ДОСТУПНО ДЛЯ ИЗУЧЕНИЯ</p>
-        </div>
-    `;
-}
+            <!-- СПИСОК УРОКОВ -->
+            <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_1')">● УРОК 1: Строение клетки</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_2')">● УРОК 2: Ткани растений</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_3')">● УРОК 3: Органы растений</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_4')">● УРОК 4: Жизнедеятельность</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('ССЫЛКА_RUTUBE_5')">● УРОК 5: Природные зоны</button>
+            </div>
+        `;
+    }
     } else if (type === 'vpr') {
         container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
         <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
