@@ -420,5 +420,20 @@ function startTetris() {
         draw();
     }, 600);
 }
+function closeVaultContent() {
+    playHevClick();
+    // 1. Останавливаем игровой цикл тетриса, если он запущен
+    if (tInterval) clearInterval(tInterval);
+    
+    // 2. Прячем контейнер с игрой/видео
+    const container = document.getElementById('vault-content');
+    if (container) {
+        container.innerHTML = "";
+        container.style.display = 'none';
+    }
+    
+    // 3. Возвращаемся к выбору кейсов
+    setState('VAULT');
+}
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
