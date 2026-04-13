@@ -182,10 +182,11 @@ function startGalaxyGame() {
         if (kills >= 20) {
             clearInterval(galaxyInterval);
             sendDataToGoogle(); 
-            alert("УГРОЗА НЕЙТРАЛИЗОВАНА! РЕЗУЛЬТАТ ЗАФИКСИРОВАН.");
+            // ВЫДАЕМ КОД ПРЯМО ТУТ
+            alert("УГРОЗА НЕЙТРАЛИЗОВАНА! ВАШ КОД ДОСТУПА: HL-SINGULARITY-106"); 
             setState('WIN');
-            return;
         }
+
 
         // 4. ПРОВЕРКА ПРОИГРЫША (время вышло)
         if (galaxyTimeLeft <= 0) {
