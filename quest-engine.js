@@ -294,11 +294,27 @@ function openVault(type) {
     container.style.display = 'block';
     container.innerHTML = ""; // Чистим
 
-    if (type === 'video') {
-        // Вставь сюда ссылки на свои видео (iframe с YouTube или просто ссылки)
-        container.innerHTML = `<h3>БАЗА ВИДЕОУРОКОВ</h3>
-        <p><a href="ССЫЛКА_НА_ТВОЕ_ВИДЕО" target="_blank" style="color:#00ff00;">Урок 1: Строение клетки</a></p>
-        <p><a href="ССЫЛКА_2" target="_blank" style="color:#00ff00;">Урок 2: Ткани</a></p>`;
+    else if (type === 'video') {
+    container.innerHTML = `
+        <h3 style="color:var(--orange)">АРХИВ: ВИДЕОУРОКИ (6 КЛАСС)</h3>
+        
+        <!-- КОНТЕЙНЕР ДЛЯ ВИДЕО (Адаптив 16:9) -->
+        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid var(--orange); background:#000;">
+            <iframe 
+                src="ТВОЯ_ССЫЛКА_ИЗ_RUTUBE_ЗДЕСЬ" 
+                style="position:absolute; top:0; left:0; width:100%; height:100%;" 
+                frameborder="0" 
+                allow="clipboard-write; autoplay" 
+                webkitAllowFullScreen mozallowfullscreen allowFullScreen>
+            </iframe>
+        </div>
+
+        <div style="margin-top:15px; text-align:left; font-size:0.8rem; color:#00ff00;">
+            <p>> ОБЪЕКТ: СТРОЕНИЕ РАСТИТЕЛЬНОЙ КЛЕТКИ</p>
+            <p>> СТАТУС: ДОСТУПНО ДЛЯ ИЗУЧЕНИЯ</p>
+        </div>
+    `;
+}
     } else if (type === 'vpr') {
         container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
         <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
