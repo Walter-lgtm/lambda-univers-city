@@ -303,11 +303,77 @@ function openVault(type) {
         container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
         <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
     } else if (type === 'tetris') {
-        container.innerHTML = `<h3>ТЕТРИС: СИНХРОНИЗАЦИЯ</h3>
-        <canvas id="tetrisCanvas" width="200" height="400" style="border:1px solid var(--orange)"></canvas>
-        <p>Используйте стрелки (пропишем управление ниже)</p>`;
-        startTetris(); // Эту функцию мы напишем следующей
+        container.innerHTML = `
+            <h3 style="color:var(--orange)">МОЛЕКУЛЯРНЫЙ СИНТЕЗ</h3>
+            <canvas id="tetrisCanvas" width="200" height="400" style="border:2px solid var(--orange); margin: 0 auto; display:block;"></canvas>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:10px;">
+                <button class="menu-button" onclick="moveTetris('L')">◀</button>
+                <button class="menu-button" onclick="moveTetris('D')">▼</button>
+                <button class="menu-button" onclick="moveTetris('R')">▶</button>
+            </div>
+        `;
+        setTimeout(startTetris, 100); // Даем время отрисовать Canvas
     }
+}
+
+// ПЕРЕМЕННЫЕ ТЕТРИСА
+let tCanvas, tCtx, tInterval;
+const tRow = 20, tCol = 10, tSq = 20; // 200x400 пикселей
+
+// Цвета "атомов" (молекулярный стиль)
+const tColors = ["#ff8c00", "#00ff00", "#00ffff", "#ff00ff", "#ffff00"];
+
+function startTetris() {
+    tCanvas = document.getElementById('tetrisCanvas');
+    if (!tCanvas) return;
+    tCtx = tCanvas.getContext('2d');
+
+    let board = [];
+    for(let r = 0; r < tRow; r++){
+        board[r] = [];
+        for(let c = 0; c < tCol; c++) board[r][c] = "black";
+    }
+
+    function drawSquare(x, y, color){
+        tCtx.fillStyle = color;
+        tCtx.fillRect(x*tSq, y*tSq, tSq, tSq);
+        tCtx.strokeStyle = "#222";
+        tCtx.strokeRect(x*tSq, y*tSq, tSq, tSq);
+    }
+
+    function drawBoard(){
+        for(let r = 0; r < tRow; r++){
+            for(let c = 0; c < tCol; c++) drawSquare(c, r, board[r][c]);
+        }
+    }
+
+    // Простая фигура (тетрамино "O" и "I")
+    let piece = {
+        pos: {x: 4, y: 0},
+        color: tColors[Math.floor(Math.random() * tColors.length)]
+    };
+
+    function drop(){
+        piece.pos.y++;
+        if(piece.pos.y >= tRow){
+            piece.pos.y = 0;
+            piece.color = tColors[Math.floor(Math.random() * tColors.length)];
+        }
+        drawBoard();
+        drawSquare(piece.pos.x, piece.pos.y, piece.color);
+    }
+
+    if(tInterval) clearInterval(tInterval);
+    tInterval = setInterval(drop, 500);
+
+    // УПРАВЛЕНИЕ ДЛЯ СМАРТФОНА (добавим в HTML под канвас)
+    window.moveTetris = (dir) => {
+        if(dir === 'L' && piece.pos.x > 0) piece.pos.x--;
+        if(dir === 'R' && piece.pos.x < tCol-1) piece.pos.x++;
+        if(dir === 'D' && piece.pos.y < tRow-1) piece.pos.y++;
+        drawBoard();
+        drawSquare(piece.pos.x, piece.pos.y, piece.color);
+    };
 }
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
