@@ -449,5 +449,17 @@ function closeVaultContent() {
     // 3. Возвращаемся к выбору кейсов
     setState('VAULT');
 }
+function loadVideo(url) {
+    playHevClick();
+    const box = document.getElementById('video-player-box');
+    const frame = document.getElementById('main-video-frame');
+    
+    if (box && frame) {
+        box.style.display = 'block'; // Показываем плеер
+        frame.src = url;             // Загружаем видео
+        // Прокручиваем экран к видео, чтобы было удобно смотреть
+        box.scrollIntoView({behavior: "smooth"});
+    }
+}
 // ЭТО ПОСЛЕДНЯЯ СТРОЧКА ФАЙЛА
 window.onload = () => setState('MENU');
