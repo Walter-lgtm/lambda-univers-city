@@ -53,6 +53,9 @@ function setState(stateName) {
         document.getElementById('state-win').style.display = 'flex';
         if (timerInterval) clearInterval(timerInterval);
     }
+        else if (stateName === 'VAULT') {
+        document.getElementById('state-vault').style.display = 'block';
+    }
 }
 
 // --- 3. ТАБЛИЦА И ОХОТА ---
