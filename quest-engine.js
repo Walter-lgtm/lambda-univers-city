@@ -291,25 +291,27 @@ function unlockSecretSector() {
 function openVault(type) {
     playHevClick();
     const container = document.getElementById('vault-content');
+    if (!container) return; // Защита от ошибок
+    
     container.style.display = 'block';
-    container.innerHTML = ""; // Чистим
+    container.innerHTML = ""; // Чистим перед загрузкой
 
-}
-    } else if (type === 'vpr') {
-        container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
-        <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
-    } else if (type === 'tetris') {
+    if (type === 'vpr') {
+        // Запускаем твой новый тренажер ВПР
+        startVPR(); 
+    } 
+    else if (type === 'tetris') {
         container.innerHTML = `
-    <h3 style="color:var(--orange)">МОЛЕКУЛЯРНЫЙ СИНТЕЗ</h3>
-    <canvas id="tetrisCanvas" width="200" height="400" style="border:2px solid var(--orange); margin: 0 auto; display:block; background:#000;"></canvas>
-    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:15px;">
-        <button class="menu-button" onclick="moveTetris('L')">◀</button>
-        <button class="menu-button" onclick="moveTetris('W')">🔄</button>
-        <button class="menu-button" onclick="moveTetris('D')">▼</button>
-        <button class="menu-button" onclick="moveTetris('R')">▶</button>
-    </div>
-`;
-        setTimeout(startTetris, 100); // Даем время отрисовать Canvas
+            <h3 style="color:var(--orange)">МОЛЕКУЛЯРНЫЙ СИНТЕЗ</h3>
+            <canvas id="tetrisCanvas" width="200" height="400" style="border:2px solid var(--orange); margin: 0 auto; display:block; background:#000;"></canvas>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:15px;">
+                <button class="menu-button" onclick="moveTetris('L')">◀</button>
+                <button class="menu-button" onclick="moveTetris('W')">🔄</button>
+                <button class="menu-button" onclick="moveTetris('D')">▼</button>
+                <button class="menu-button" onclick="moveTetris('R')">▶</button>
+            </div>
+        `;
+        setTimeout(startTetris, 100);
     }
 }
 
