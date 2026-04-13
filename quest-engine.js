@@ -294,25 +294,22 @@ function openVault(type) {
     container.style.display = 'block';
     container.innerHTML = ""; // Чистим
 
-    else  if (type === 'video') {
+    else if (type === 'video') {
         container.innerHTML = `
             <h3 style="color:var(--orange)">АРХИВ: ВИДЕОУРОКИ (6 КЛАСС)</h3>
-            
-            <!-- ПЛЕЕР (Изначально пустой) -->
             <div id="video-player-box" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border:1px solid var(--orange); background:#000; margin-bottom:15px; display:none;">
                 <iframe id="main-video-frame" src="" style="position:absolute; top:0; left:0; width:100%; height:100%;" frameborder="0" allowfullscreen></iframe>
             </div>
-
-            <!-- СПИСОК УРОКОВ -->
             <div style="display:flex; flex-direction:column; gap:8px; text-align:left;">
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/39ccb9157179b73dff0447ae747b3c38/?p=jQ6c8Obmc8ELujqsj1tb9g')">● УРОК 1: Обмен веществ – главный признак жизни</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/2b633bd510815146b08593c031dfbb4e/?p=aCrCsXmgN3uI5f8OFyTGmg')">● УРОК 2: Удобрения и почвенное питание растений</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/deb981889db74e1b08d77f0ab8c71afd/?p=3soCTNjB1rXTUPk1-fDWEA')">● УРОК 1: Обмен веществ</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/545fbd5aaa381cd44ac387b45eae4b4d/?p=3eyzry8BMbsXcsbMyj2x9A')">● УРОК 2: Удобрения</button>
                 <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/140c53a4efcf003e9caf639d0a367335/?p=CqD7a89NZmRMYQlneLqgaw')">● УРОК 3: Фотосинтез</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/545fbd5aaa381cd44ac387b45eae4b4d/?p=3eyzry8BMbsXcsbMyj2x9A')">● УРОК 4: Фотосинтез</button>
-                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/deb981889db74e1b08d77f0ab8c71afd/?p=3soCTNjB1rXTUPk1-fDWEA')">● УРОК 5: Гетеротрофное питание</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/2b633bd510815146b08593c031dfbb4e/?p=aCrCsXmgN3uI5f8OFyTGmg')">● УРОК 4: Фотосинтез ч.2</button>
+                <button class="menu-button" style="font-size:0.7rem; padding:10px;" onclick="loadVideo('https://rutube.ru/video/private/39ccb9157179b73dff0447ae747b3c38/?p=jQ6c8Obmc8ELujqsj1tb9g')">● УРОК 5: Гетеротрофное питание</button>
             </div>
         `;
     }
+}
     } else if (type === 'vpr') {
         container.innerHTML = `<h3>ТРЕНАЖЕР ВПР</h3><p style="font-size:0.8rem;">Готовься к аттестации, боец!</p>
         <button class="menu-button" onclick="window.open('ССЫЛКА_НА_ТЕСТ')">НАЧАТЬ ТЕСТ</button>`;
