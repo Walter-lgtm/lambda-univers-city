@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMINAL: VOTE_SYSTEM</title>
+    <link rel="stylesheet" href="style.css"> <!-- Юзаем те же стили для атмосферы -->
+    <style>
+        body { background: #000; color: #00ff00; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .vote-container { display: flex; width: 90%; height: 60vh; gap: 20px; align-items: flex-end; border-bottom: 2px solid #555; padding-bottom: 10px; }
+        .bar { flex: 1; transition: height 0.5s ease-in-out; position: relative; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.5rem; text-shadow: 0 0 10px #000; }
+        .bar-pro { background: linear-gradient(to top, #004400, #00ff00); box-shadow: 0 0 20px #00ff00; color: #000; }
+        .bar-contra { background: linear-gradient(to top, #441100, #ff8c00); box-shadow: 0 0 20px #ff8c00; color: #000; }
+        .btn-group { display: flex; width: 90%; gap: 20px; margin-top: 30px; }
+        .vote-btn { flex: 1; padding: 20px; border: 2px solid; background: transparent; cursor: pointer; font-family: monospace; font-size: 1rem; font-weight: bold; text-transform: uppercase; }
+        .btn-pro { color: #00ff00; border-color: #00ff00; }
+        .btn-contra { color: #ff8c00; border-color: #ff8c00; }
+        .label { position: absolute; bottom: -30px; width: 100%; text-align: center; color: #fff; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <h2 style="color:var(--orange); text-align:center;">ОПРОС: ЛОЯЛЬНОСТЬ К СУББОТНИКУ</h2>
+    <p style="font-size:0.7rem; color:#888;">ID_SESSION: #SUBBOTNIK_2024</p>
+
+    <div class="vote-container">
+        <div id="bar-pro" class="bar bar-pro" style="height: 50%;">0<div class="label">ЗА</div></div>
+        <div id="bar-contra" class="bar bar-contra" style="height: 50%;">0<div class="label">ПРОТИВ</div></div>
+    </div>
+
+    <div class="btn-group">
+        <button class="vote-btn btn-pro" onclick="castVote('pro')">ПРИНЯТЬ</button>
+        <button class="vote-btn btn-contra" onclick="castVote('contra')">ОТКЛОНИТЬ</button>
+    </div>
+
+    <script>
+        let votes = { pro: 0, contra: 0 };
+
+        function castVote(type) {
+            // Вибрация для мобилок
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            votes[type]++;
+            updateUI();
+            
+            // Здесь можно добавить отправку в ту же Google Таблицу (по желанию)
+            console.log("Голос учтен: " + type);
+        }
+
+        function updateUI() {
+            const total = votes.pro + votes.contra;
+            const proPercent = total === 0 ? 50 : (votes.pro / total) * 100;
+            const contraPercent = total === 0 ? 50 : (votes.contra / total) * 100;
+
+            document.getElementById('bar-pro').style.height = proPercent + "%";
+            document.getElementById('bar-pro').innerText = votes.pro;
+
+            document.getElementById('bar-contra').style.height = contraPercent + "%";
+            document.getElementById('bar-contra').innerText = votes.contra;
+        }
+    </script>
+</body>
+</html>
