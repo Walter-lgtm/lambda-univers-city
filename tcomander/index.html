@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ВПК: Система Отбора Командиров λ</title>
+    <style>
+        :root { --hl-orange: #ff9d00; --hl-bg: #0b0b0b; --hl-border: rgba(255, 157, 0, 0.4); }
+        body { background: var(--hl-bg); color: var(--hl-orange); font-family: 'Courier New', Courier, monospace; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .terminal { border: 2px solid var(--hl-orange); padding: 30px; width: 90%; max-width: 650px; background: rgba(15, 15, 15, 0.95); box-shadow: 0 0 25px rgba(255, 157, 0, 0.2); position: relative; }
+        .logo { font-size: 60px; text-align: center; margin-bottom: 10px; font-weight: bold; text-shadow: 0 0 10px var(--hl-orange); }
+        h1 { text-align: center; font-size: 1.2rem; letter-spacing: 2px; border-bottom: 1px solid var(--hl-border); padding-bottom: 15px; margin-bottom: 25px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.9rem; text-transform: uppercase; }
+        input, select { background: #000; color: var(--hl-orange); border: 1px solid var(--hl-border); padding: 12px; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; font-family: inherit; }
+        input:focus { border-color: var(--hl-orange); box-shadow: 0 0 10px var(--hl-border); }
+        .question { margin-bottom: 30px; border-left: 3px solid var(--hl-border); padding-left: 15px; animation: fadeIn 0.5s ease-in; }
+        .question p { margin-top: 0; line-height: 1.4; }
+        .btn { background: var(--hl-orange); color: #000; border: none; padding: 18px; width: 100%; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #fff; box-shadow: 0 0 20px #fff; }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        #status-msg { text-align: center; padding: 40px; font-size: 1.2rem; line-height: 1.6; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    </style>
+</head>
+<body>
+
+<div class="terminal" id="main-terminal">
+    <div class="logo">λ</div>
+    <h1>COMMANDER_SELECTION_PROTOCOL</h1>
+
+    <div id="form-content">
+        <div class="input-group">
+            <label>Идентификатор (ФИО):</label>
+            <input type="text" id="fullName" placeholder="ВВЕДИТЕ ДАННЫЕ..." required>
+        </div>
+        <div class="input-group">
+            <label>Класс / Подразделение:</label>
+            <input type="text" id="grade" placeholder="НАПР. 9-А" required>
+        </div>
+
+        <div id="quiz-area">
+            <!-- Вопросы генерируются автоматически для компактности кода -->
+        </div>
+
+        <button class="btn" id="submitBtn" onclick="sendData()">Инициализировать передачу</button>
+    </div>
+
+    <div id="status-msg" style="display:none;"></div>
+</div>
+
+<script>
+    // СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ПОСЛЕ ДЕПЛОЯ APPS SCRIPT
+    const WEB_APP_URL = "ТВОЯ_ССЫЛКА_ИЗ_APPS_SCRIPT";
+
+    const questions = [
+        "Готовы ли вы нести личную ответственность за действия своего взвода?",
+        "Сможете ли вы отдать приказ товарищу, если это необходимо для выполнения задачи?",
+        "Как вы поступите в конфликтной ситуации внутри коллектива? (Приму решение сам)",
+        "Важна ли дисциплина выше личных дружеских отношений?",
+        "Умеете ли вы сохранять спокойствие в критических ситуациях?",
+        "Готовы ли вы уделять дополнительное время подготовке взвода?",
+        "Считаете ли вы, что командир должен быть примером в физической подготовке?",
+        "Насколько быстро вы принимаете решения в условиях дефицита времени?",
+        "Готовы ли вы признать свою ошибку перед строем?",
+        "Обладаете ли вы навыками убеждения сверстников?"
+    ];
+
+    const quizArea = document.getElementById('quiz-area');
+    questions.forEach((q, i) => {
+        quizArea.innerHTML += `
+            <div class="question">
+                <p>${i+1}. ${q}</p>
+                <select class="q-score">
+                    <option value="1">Нет / Никогда</option>
+                    <option value="2">Редко / Вряд ли</option>
+                    <option value="4">Часто / Скорее да</option>
+                    <option value="5">Всегда / Полностью</option>
+                </select>
+            </div>`;
+    });
+
+    window.onload = () => {
+        if(localStorage.getItem('lambda_vpk_complete')) {
+            lockSystem("ДОСТУП ЗАБЛОКИРОВАН. ПРОТОКОЛ УЖЕ БЫЛ ВЫПОЛНЕН ДАННЫМ ПОЛЬЗОВАТЕЛЕМ.");
+        }
+    };
+
+    async function sendData() {
+        const btn = document.getElementById('submitBtn');
+        const name = document.getElementById('fullName').value;
+        const grade = document.getElementById('grade').value;
+
+        if(!name || !grade) {
+            alert("ОШИБКА: ИДЕНТИФИКАЦИЯ НЕ ЗАВЕРШЕНА");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "ПЕРЕДАЧА ДАННЫХ...";
+
+        let totalScore = 0;
+        document.querySelectorAll('.q-score').forEach(s => totalScore += parseInt(s.value));
+
+        const payload = {
+            fullName: name,
+            grade: grade,
+            score: totalScore
+        };
+
+        try {
+            // Используем fetch с mode: 'no-cors' для работы с Google Apps Script
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                body: JSON.stringify(payload)
+            });
+            
+            localStorage.setItem('lambda_vpk_complete', 'true');
+            lockSystem("ДАННЫЕ УСПЕШНО ПЕРЕДАНЫ В ЦЕНТРАЛЬНЫЙ АРХИВ. ОЖИДАЙТЕ РАСПРЕДЕЛЕНИЯ.");
+        } catch (e) {
+            btn.disabled = false;
+            btn.innerText = "ПОВТОРИТЬ ПОПЫТКУ";
+            alert("ОШИБКА СИНХРОНИЗАЦИИ. ПРОВЕРЬТЕ СОЕДИНЕНИЕ.");
+        }
+    }
+
+    function lockSystem(text) {
+        document.getElementById('form-content').style.display = 'none';
+        const msg = document.getElementById('status-msg');
+        msg.style.display = 'block';
+        msg.innerText = text;
+    }
+</script>
+
+</body>
+</html>
