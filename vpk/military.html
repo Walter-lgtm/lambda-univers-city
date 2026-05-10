@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPERATION: PATRIOT</title>
+    <style>
+        :root { --red: #ff0000; --gold: #ffd700; --dark: #1a1a1a; }
+        body { background: var(--dark); color: #fff; font-family: 'Courier New', monospace; margin: 0; padding: 20px; overflow-x: hidden; }
+        .screen { display: none; text-align: center; animation: fadeIn 0.5s; }
+        .active { display: block; }
+        .btn { background: transparent; border: 2px solid var(--red); color: var(--red); padding: 15px 30px; cursor: pointer; font-weight: bold; text-transform: uppercase; margin-top: 20px; width: 100%; }
+        .input-field { background: #000; border: 1px solid #555; color: var(--gold); padding: 10px; width: 80%; margin: 10px 0; text-align: center; font-size: 1.1rem; }
+        .pogon-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; }
+        .pogon-img { width: 60px; height: auto; border: 1px solid var(--gold); }
+        select { background: #333; color: #fff; padding: 5px; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН 1: АВТОРИЗАЦИЯ -->
+    <div id="state-auth" class="screen active">
+        <h2 style="color:var(--red)">ВХОД В СИСТЕМУ: "ПАТРИОТ"</h2>
+        <p>ВВЕДИТЕ ДАННЫЕ БОЙЦА:</p>
+        <input type="text" id="p-name" class="input-field" placeholder="ФИО">
+        <input type="text" id="p-class" class="input-field" placeholder="КЛАСС">
+        <button class="btn" onclick="startQuest()">ПРИСТУПИТЬ!</button>
+    </div>
+
+    <!-- ЭКРАН 2: ПОГОНЫ -->
+    <div id="state-pogony" class="screen">
+        <h3>ЗАДАНИЕ 1: СУБОРДИНАЦИЯ</h3>
+        <p style="font-size: 0.8rem;">ОПРЕДЕЛИТЕ ЗВАНИЯ ПО ПОГОНАМ:</p>
+        <div id="pogony-list">
+            <!-- Сюда вставим погоны через JS -->
+        </div>
+        <button class="btn" onclick="checkPogony()">ПРОВЕРИТЬ</button>
+    </div>
+
+    <!-- ЭКРАН 3: МОРЗЕ -->
+    <div id="state-morse" class="screen">
+        <h3>ЗАДАНИЕ 2: РАДИОПЕРЕХВАТ</h3>
+        <p>РАСШИФРУЙТЕ ЛОКАЦИЮ:</p>
+        <div id="morse-code" style="font-size: 2rem; letter-spacing: 5px; margin: 20px 0;">
+            -... .. -... .-.. .. --- - . -.- .-
+        </div>
+        <input type="text" id="morse-answer" class="input-field" placeholder="ОТВЕТ">
+        <button class="btn" onclick="checkMorse()">ПОДТВЕРДИТЬ</button>
+    </div>
+
+    <!-- ЭКРАН 4: БИБЛИОТЕКА (ШЛЮЗ) -->
+    <div id="state-library" class="screen">
+        <h3>ЗАДАНИЕ 3: ОБЪЕКТ λ</h3>
+        <p>ВЫДВИГАЙТЕСЬ В БИБЛИОТЕКУ. НАЙДИТЕ ДОКУМЕНТ С ПЕЧАТЬЮ λ.</p>
+        <input type="text" id="secret-6" class="input-field" placeholder="6-ЗНАЧНЫЙ КОД">
+        <button class="btn" onclick="unlockGimn()">РАЗБЛОКИРОВАТЬ</button>
+    </div>
+
+    <!-- ЭКРАН 5: ГИМН -->
+    <div id="state-gimn" class="screen">
+        <h3>ЗАДАНИЕ 4: ОПЕРАЦИЯ "РЕЗОНАНС"</h3>
+        <p>СКАЧАЙТЕ ФАЙЛ И ОБЕСПЕЧЬТЕ ТРАНСЛЯЦИЮ НА ПЕРЕМЕНЕ.</p>
+        <button class="btn" style="border-color:var(--gold); color:var(--gold)" onclick="window.open('ССЫЛКА_НА_ТАПОК')">СКАЧАТЬ ГИМН</button>
+        <p style="font-size: 0.7rem; margin-top: 20px; color: #888;">ПОСЛЕ ВКЛЮЧЕНИЯ МУЗЫКИ ОЖИДАЙТЕ ПОДХОДА G-MAN.</p>
+    </div>
+
+    <!-- ЭКРАН 6: ФИНАЛ (АГЕНТ) -->
+    <div id="state-final" class="screen">
+        <h2 style="color:var(--red)">ЦЕЛЬ ОБНАРУЖЕНА</h2>
+        <img src="https://placeholder.com" id="agent-art" style="border: 2px solid var(--red); width: 200px;">
+        <div id="agent-info" style="text-align: left; display: inline-block; margin-top: 15px;">
+            <p>> ОБЪЕКТ: <span id="a-name">ИВАНОВА А.</span></p>
+            <p>> КЛАСС: 8 "Б"</p>
+            <p>> СТАТУС: ЮНАРМЕЕЦ</p>
+            <p>> ПАРОЛЬ: "ПОБЕДА БУДЕТ ЗА НАМИ"</p>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--gold); margin-top: 20px;">НАЙДИТЕ ЕЁ ПЕРВЫМИ И ПРОИЗНЕСИТЕ ПАРОЛЬ!</p>
+    </div>
+
+    <script>
+        // ДАННЫЕ ДЛЯ ЗАДАНИЯ 1
+        const pogonyData = [
+            { img: 'https://icons8.com', name: 'СЕРЖАНТ' }, // Замени на реальные картинки
+            { img: 'https://icons8.com', name: 'ЛЕЙТЕНАНТ' },
+            { img: 'https://icons8.com', name: 'КАПИТАН' },
+            { img: 'https://icons8.com', name: 'МАЙОР' }
+        ];
+
+        function startQuest() {
+            if(!document.getElementById('p-name').value) return alert("ВВЕДИТЕ ФИО!");
+            showScreen('state-pogony');
+            renderPogony();
+        }
+
+        function renderPogony() {
+            const container = document.getElementById('pogony-list');
+            pogonyData.forEach((p, index) => {
+                container.innerHTML += `
+                    <div class="pogon-row">
+                        <img src="${p.img}" class="pogon-img">
+                        <select id="ans-${index}">
+                            <option value="none">?</option>
+                            <option value="СЕРЖАНТ">СЕРЖАНТ</option>
+                            <option value="МАЙОР">МАЙОР</option>
+                            <option value="ЛЕЙТЕНАНТ">ЛЕЙТЕНАНТ</option>
+                            <option value="КАПИТАН">КАПИТАН</option>
+                        </select>
+                    </div>
+                `;
+            });
+        }
+
+        function checkPogony() {
+            let correct = true;
+            pogonyData.forEach((p, i) => {
+                if(document.getElementById('ans-' + i).value !== p.name) correct = false;
+            });
+            if(correct) showScreen('state-morse');
+            else alert("ОШИБКА В ЗВАНИЯХ! ПЕРЕПРОВЕРЬТЕ СУБОРДИНАЦИЮ.");
+        }
+
+        function checkMorse() {
+            const ans = document.getElementById('morse-answer').value.toLowerCase();
+            if(ans === 'библиотека') showScreen('state-library');
+            else alert("ШИФРОВКА НЕВЕРНА. ПОПРОБУЙТЕ СНОВА.");
+        }
+
+        function unlockGimn() {
+            const code = document.getElementById('secret-6').value;
+            if(code === '123456') showScreen('state-gimn'); // Твой 6-значный код
+            else alert("КОД НЕВЕРЕН. ИЩИТЕ ДОКУМЕНТ λ.");
+        }
+
+        // Финальный переход вызывается ТОБОЙ через QR
+        function setFinalState() { showScreen('state-final'); }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
