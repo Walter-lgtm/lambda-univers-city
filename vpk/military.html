@@ -79,67 +79,103 @@
     </div>
 
     <script>
-        // ДАННЫЕ ДЛЯ ЗАДАНИЯ 1
-        const pogonyData = [
-            { img: 'https://icons8.com', name: 'СЕРЖАНТ' }, // Замени на реальные картинки
-            { img: 'https://icons8.com', name: 'ЛЕЙТЕНАНТ' },
-            { img: 'https://icons8.com', name: 'КАПИТАН' },
-            { img: 'https://icons8.com', name: 'МАЙОР' }
-        ];
+    // 1. ОПРЕДЕЛЯЕМ МАРШРУТ (через ссылку ?route=1 или ?route=2)
+    const urlParams = new URLSearchParams(window.location.search);
+    const route = urlParams.get('route') || '1';
 
-        function startQuest() {
-            if(!document.getElementById('p-name').value) return alert("ВВЕДИТЕ ФИО!");
-            showScreen('state-pogony');
-            renderPogony();
+    // 2. КОНФИГУРАЦИЯ МАРШРУТОВ (Локации и шифры)
+    const config = {
+        '1': { 
+            morse: 'библиотека', 
+            codeMorse: '-... .. -... .-.. .. --- - . -.- .-', 
+            pass: '123456', 
+            loc: 'БИБЛИОТЕКУ' 
+        },
+        '2': { 
+            morse: 'актовыйзал', 
+            codeMorse: '.- -.- - --- .-- -.-- .--- --.. .- .-..', 
+            pass: '654321', 
+            loc: 'АКТОВЫЙ ЗАЛ' 
         }
+    };
 
-        function renderPogony() {
-            const container = document.getElementById('pogony-list');
-            pogonyData.forEach((p, index) => {
-                container.innerHTML += `
-                    <div class="pogon-row">
-                        <img src="${p.img}" class="pogon-img">
-                        <select id="ans-${index}">
-                            <option value="none">?</option>
-                            <option value="СЕРЖАНТ">СЕРЖАНТ</option>
-                            <option value="МАЙОР">МАЙОР</option>
-                            <option value="ЛЕЙТЕНАНТ">ЛЕЙТЕНАНТ</option>
-                            <option value="КАПИТАН">КАПИТАН</option>
-                        </select>
-                    </div>
-                `;
-            });
-        }
+    const currentConf = config[route] || config['1'];
 
-        function checkPogony() {
-            let correct = true;
-            pogonyData.forEach((p, i) => {
-                if(document.getElementById('ans-' + i).value !== p.name) correct = false;
-            });
-            if(correct) showScreen('state-morse');
-            else alert("ОШИБКА В ЗВАНИЯХ! ПЕРЕПРОВЕРЬТЕ СУБОРДИНАЦИЮ.");
-        }
+    // 3. ТВОИ ЗАГРУЖЕННЫЕ ФАЙЛЫ
+    const pogonyData = [
+        { img: 'serjant.jpg', name: 'СЕРЖАНТ' },
+        { img: 'leitenant.jpg', name: 'ЛЕЙТЕНАНТ' },
+        { img: 'kapitan.jpg', name: 'КАПИТАН' },
+        { img: 'major.jpg', name: 'МАЙОР' }
+    ];
 
-        function checkMorse() {
-            const ans = document.getElementById('morse-answer').value.toLowerCase();
-            if(ans === 'библиотека') showScreen('state-library');
-            else alert("ШИФРОВКА НЕВЕРНА. ПОПРОБУЙТЕ СНОВА.");
-        }
+    // Функция запуска квеста
+    function startQuest() {
+        const nick = document.getElementById('p-name').value;
+        if(!nick) return alert("ВВЕДИТЕ ФИО!");
+        
+        // Подставляем данные маршрута в интерфейс
+        document.getElementById('morse-code').innerText = currentConf.codeMorse;
+        document.getElementById('state-library').querySelector('p').innerText = 
+            `ВЫДВИГАЙТЕСЬ В ${currentConf.loc}. НАЙДИТЕ ДОКУМЕНТ С ПЕЧАТЬЮ λ.`;
+        
+        showScreen('state-pogony');
+        renderPogony();
+    }
 
-        function unlockGimn() {
-            const code = document.getElementById('secret-6').value;
-            if(code === '123456') showScreen('state-gimn'); // Твой 6-значный код
-            else alert("КОД НЕВЕРЕН. ИЩИТЕ ДОКУМЕНТ λ.");
-        }
+    // Отрисовка погон
+    function renderPogony() {
+        const container = document.getElementById('pogony-list');
+        container.innerHTML = ""; // Очистка
+        pogonyData.forEach((p, index) => {
+            container.innerHTML += `
+                <div class="pogon-row">
+                    <img src="${p.img}" class="pogon-img">
+                    <select id="ans-${index}">
+                        <option value="none">?</option>
+                        <option value="СЕРЖАНТ">СЕРЖАНТ</option>
+                        <option value="МАЙОР">МАЙОР</option>
+                        <option value="ЛЕЙТЕНАНТ">ЛЕЙТЕНАНТ</option>
+                        <option value="КАПИТАН">КАПИТАН</option>
+                    </select>
+                </div>
+            `;
+        });
+    }
 
-        // Финальный переход вызывается ТОБОЙ через QR
-        function setFinalState() { showScreen('state-final'); }
+    // Проверка Задания 1
+    function checkPogony() {
+        let correct = true;
+        pogonyData.forEach((p, i) => {
+            if(document.getElementById('ans-' + i).value !== p.name) correct = false;
+        });
+        if(correct) showScreen('state-morse');
+        else alert("ОШИБКА В ЗВАНИЯХ! ПЕРЕПРОВЕРЬТЕ СУБОРДИНАЦИЮ.");
+    }
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo(0,0);
-        }
-    </script>
+    // Проверка Задания 2 (Морзе)
+    function checkMorse() {
+        const ans = document.getElementById('morse-answer').value.toLowerCase().replace(/\s/g, '');
+        if(ans === currentConf.morse) showScreen('state-library');
+        else alert("ШИФРОВКА НЕВЕРНА. ПОПРОБУЙТЕ СНОВА.");
+    }
+
+    // Проверка Задания 3 (Код из библиотеки/зала)
+    function unlockGimn() {
+        const code = document.getElementById('secret-6').value;
+        if(code === currentConf.pass) showScreen('state-gimn');
+        else alert("КОД НЕВЕРЕН. ИЩИТЕ ДОКУМЕНТ λ.");
+    }
+
+    // Переключение экранов
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    // Эту функцию ты вызовешь через QR в конце
+    function setFinalState() { showScreen('state-final'); }
+</script>
 </body>
 </html>
