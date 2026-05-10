@@ -169,6 +169,18 @@
         if(target) target.classList.add('active');
         window.scrollTo(0,0);
     }
+        function sendDataToGman() {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxGtN6MFjWi3h6CEHtLdQvIom6BOnujvWvfNy5YZ6jyQAxG18OWYiqmatfgO_u7i4Ay/exec'; // ВСТАВЬ СВОЮ ССЫЛКУ!
+    const name = document.getElementById('p-name').value;
+    const pClass = document.getElementById('p-class').value;
+
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, pClass: pClass, route: route })
+    });
+}
 </script>
 </body>
 </html>
