@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLACK MESA: CHEMICAL BOND TERMINAL</title>
+    <style>
+        :root { 
+            --lambda-orange: #ff9d00; 
+            --hazard-yellow: #f1c40f; 
+            --mesa-bg: #1a1a1a; 
+            --border-grey: #444;
+            --alert-red: #ff3300;
+        }
+        
+        body { background: var(--mesa-bg); color: #ccc; font-family: 'Verdana', sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* [SECURITY CLEARANCE] Consent Guard */
+        #consent-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .modal-content { border: 3px solid var(--lambda-orange); padding: 30px; max-width: 500px; text-align: center; background: #222; box-shadow: 0 0 30px rgba(255, 157, 0, 0.2); }
+        
+        /* UI Elements */
+        #auth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        .timer-display { position: fixed; top: 10px; right: 10px; color: var(--lambda-orange); font-size: 1.5rem; background: #000; padding: 10px; border: 1px solid var(--lambda-orange); font-family: 'Courier New', monospace; z-index: 100; }
+        .timer-alert { color: var(--alert-red); border-color: var(--alert-red); animation: pulse 1s infinite; }
+        
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .mesa-input { background: #000; border: 1px solid var(--border-grey); color: var(--lambda-orange); padding: 12px; margin: 10px; width: 300px; text-align: center; outline: none; border-radius: 0; font-family: inherit; }
+        .mesa-btn { background: #333; border: 1px solid var(--border-grey); color: #fff; padding: 15px 30px; cursor: pointer; text-transform: uppercase; font-weight: bold; transition: 0.2s; margin: 5px; }
+        .mesa-btn:hover { border-color: var(--lambda-orange); color: var(--lambda-orange); }
+        .selected-btn { background: var(--lambda-orange) !important; color: #000 !important; }
+
+        .task-card { border: 1px solid var(--border-grey); background: rgba(255,255,255,0.03); padding: 25px; margin: 25px auto; max-width: 800px; border-top: 4px solid var(--lambda-orange); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        td, th { border: 1px solid var(--border-grey); padding: 10px; text-align: center; }
+        select { background: #000; color: var(--lambda-orange); border: 1px solid var(--lambda-orange); padding: 5px; }
+
+        .hidden { display: none !important; }
+        #final-report { background: #f0f0f0; color: #000; padding: 40px; border: 2px solid #000; max-width: 800px; margin: 20px auto; font-family: 'Courier New', monospace; }
+        
+        .lambda-logo { font-size: 3rem; color: var(--lambda-orange); margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="consent-modal">
+    <div class="modal-content">
+        <div class="lambda-logo">λ</div>
+        <h2 style="color: var(--lambda-orange);">[SECURITY CLEARANCE]</h2>
+        <p>После выполнения всех заданий и получении результата Вы будете согласны с выставлением оценки в электронный журнал учителем?</p>
+        <button class="mesa-btn" onclick="acceptConsent()">[ СОГЛАСЕН ]</button>
+        <button class="mesa-btn" style="color: #666;" onclick="location.reload()">[ ОТМЕНА ]</button>
+    </div>
+</div>
+
+<div id="app" class="hidden">
+    <div id="timer" class="timer-display hidden">[ TIME: 10:00 ]</div>
+    
+    <div id="auth">
+        <div class="lambda-logo">λ</div>
+        <h1 style="color: var(--lambda-orange); margin: 0;">CHEMICAL_BOND_v2.0</h1>
+        <p style="font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 30px;">BLACK MESA RESEARCH FACILITY</p>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <input type="text" id="userName" class="mesa-input" placeholder="ФИО СОТРУДНИКА" autocomplete="off">
+            <input type="text" id="userClass" class="mesa-input" placeholder="КЛАСС" autocomplete="off">
+            <button class="mesa-btn" onclick="startTest()">ACCESS TERMINAL</button>
+        </div>
+    </div>
+
+    <div id="test-container" class="hidden">
+        <div id="quiz"></div>
+        <button class="mesa-btn" onclick="finishTest()" style="width: 100%; border-color: var(--lambda-orange); margin-top: 30px;">SUBMIT DATA TO SECTOR C</button>
+    </div>
+
+    <div id="final-report" class="hidden">
+        <h2 style="border-bottom: 2px solid #000;">RESEARCH PROTOCOL: CHEMICAL BOND</h2>
+        <p><b>NAME:</b> <span id="report-fio"></span> | <b>SECTOR:</b> <span id="report-class"></span></p>
+        <p><b>EFFICIENCY:</b> <span id="report-score"></span> | <b>GRADE:</b> <span id="report-grade"></span></p>
+        <div id="answer-log" style="text-align: left; margin-top: 20px; font-size: 0.9rem;"></div>
+        <button class="mesa-btn" onclick="window.print()" style="margin-top:20px; color: #000;">GENERATE HARD COPY (PDF)</button>
+    </div>
+</div>
+<script>
+let startTime;
+let timerInterval;
+let currentQuiz = [];
+
+const poolVariants = {
+    task1: [
+        { q: "В молекуле фтора (F<sub>2</sub>) ковалентная связь:", opts: ["одинарная неполярная", "одинарная полярная", "двойная неполярная", "двойная полярная"], a: "одинарная неполярная" },
+        { q: "В молекуле азота (N<sub>2</sub>) ковалентная связь:", opts: ["одинарная неполярная", "двойная неполярная", "тройная неполярная", "тройная полярная"], a: "тройная неполярная" },
+        { q: "В молекуле кислорода (O<sub>2</sub>) ковалентная связь:", opts: ["одинарная неполярная", "двойная неполярная", "двойная полярная", "тройная неполярная"], a: "двойная неполярная" }
+    ],
+    task2: [
+        { q: "В ряду атомов P, S, Br, F, O наибольшую электроотрицательность имеет:", opts: ["P", "S", "Br", "F", "O"], a: "F" },
+        { q: "В ряду атомов C, N, O, Si, Al наибольшую электроотрицательность имеет:", opts: ["C", "N", "O", "Si", "Al"], a: "O" },
+        { q: "В ряду атомов Cl, Br, I, S, P наибольшую электроотрицательность имеет:", opts: ["Cl", "Br", "I", "S", "P"], a: "Cl" }
+    ],
+    task3: [
+        { rows: [{f:"O2", a:"КНС"}, {f:"NH3", a:"КПС"}, {f:"NaCl", a:"Ионная"}, {f:"HCl", a:"КПС"}] },
+        { rows: [{f:"F2", a:"КНС"}, {f:"H2O", a:"КПС"}, {f:"LiF", a:"Ионная"}, {f:"CH4", a:"КПС"}] },
+        { rows: [{f:"N2", a:"КНС"}, {f:"PH3", a:"КПС"}, {f:"KBr", a:"Ионная"}, {f:"H2S", a:"КПС"}] }
+    ]
+};
+
+function generateQuiz() {
+    const v1 = poolVariants.task1[Math.floor(Math.random() * poolVariants.task1.length)];
+    const v2 = poolVariants.task2[Math.floor(Math.random() * poolVariants.task2.length)];
+    const v3 = poolVariants.task3[Math.floor(Math.random() * poolVariants.task3.length)];
+
+    return [
+        { id: 1, type: "choice", q: `Задание 1. ${v1.q}`, opts: v1.opts, a: v1.a },
+        { id: 2, type: "select", q: `Задание 2. ${v2.q}`, opts: v2.opts, a: v2.a },
+        { id: 3, type: "matrix", q: "Задание 3. Соотнесите формулу вещества и тип химической связи:", rows: v3.rows, opts: ["Ионная", "КПС", "КНС"] },
+        { id: 4, type: "input", q: "Задание 4. Напишите код (цифры), обозначающий вещества в порядке УВЕЛИЧЕНИЯ полярности связей:<br>1)SiH<sub>4</sub> 2)PH<sub>3</sub> 3)H<sub>2</sub>S 4)HCl", a: "1234" },
+        { id: 5, type: "multi", q: "Задание 5. Выберите вещества с МОЛЕКУЛЯРНОЙ кристаллической решёткой из списка:<br>1)N<sub>2</sub> 2)NaCl 3)F<sub>2</sub> 4)CuS 5)O<sub>3</sub> 6)SiH<sub>4</sub> 7)CaCO<sub>3</sub>", opts: ["1", "2", "3", "4", "5", "6", "7"], a: ["1", "3", "5", "6"] }
+    ];
+}
+  function acceptConsent() {
+    document.getElementById('consent-modal').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+}
+
+function startTest() {
+    const fio = document.getElementById('userName').value.trim();
+    const uClass = document.getElementById('userClass').value.trim();
+    if(!fio || !uClass) { alert("ДОСТУП ОТКЛОНЕН: Введите ФИО и Сектор!"); return; }
+
+    currentQuiz = generateQuiz();
+    renderQuiz();
+    
+    document.getElementById('auth').classList.add('hidden');
+    document.getElementById('test-container').classList.remove('hidden');
+    document.getElementById('timer').classList.remove('hidden');
+    
+    startTimer(600); // 10 минут = 600 секунд
+}
+
+function startTimer(duration) {
+    let timer = duration, minutes, seconds;
+    timerInterval = setInterval(function () {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        seconds = seconds < 10 ? "0" + seconds : seconds;
+
+        const display = document.getElementById('timer');
+        display.textContent = `[ TIME: ${minutes}:${seconds} ]`;
+
+        if (timer <= 60) display.classList.add('timer-alert'); // Красный пульс на последней минуте
+
+        if (--timer < 0) {
+            clearInterval(timerInterval);
+            alert("ВРЕМЯ ИСТЕКЛО! Протокол автоматической фиксации запущен.");
+            finishTest();
+        }
+    }, 1000);
+}
+
+function renderQuiz() {
+    const quizDiv = document.getElementById('quiz');
+    quizDiv.innerHTML = "";
+    currentQuiz.forEach((item, idx) => {
+        let html = `<div class="task-card"><p>${item.q}</p>`;
+        if(item.type === "choice") {
+            html += item.opts.map(o => `<button class="mesa-btn" onclick="selectSingle(this, ${idx})">${o}</button>`).join('');
+            html += `<input type="hidden" class="ans" id="ans-${idx}">`;
+        } else if(item.type === "select") {
+            html += `<select class="ans" id="ans-${idx}"><option value="">?</option>${item.opts.map(o=>`<option value="${o}">${o}</option>`)}</select>`;
+        } else if(item.type === "matrix") {
+            html += `<table>`;
+            item.rows.forEach((r, rIdx) => {
+                html += `<tr><td>${r.f}</td><td><select class="sub-ans" data-correct="${r.a}"><option value="">?</option>${item.opts.map(o=>`<option value="${o}">${o}</option>`)}</select></td></tr>`;
+            });
+            html += `</table><input type="hidden" class="ans-matrix" id="ans-${idx}">`;
+        } else if(item.type === "input") {
+            html += `<input type="text" class="mesa-input ans" id="ans-${idx}" placeholder="Код...">`;
+        } else if(item.type === "multi") {
+            html += item.opts.map(o => `<button class="mesa-btn" onclick="selectMulti(this, ${idx})">${o}</button>`).join('');
+            html += `<input type="hidden" class="ans" id="ans-${idx}">`;
+        }
+        html += `</div>`;
+        quizDiv.innerHTML += html;
+    });
+}
+
+function selectSingle(btn, idx) {
+    btn.parentElement.querySelectorAll('.mesa-btn').forEach(b => b.classList.remove('selected-btn'));
+    btn.classList.add('selected-btn');
+    document.getElementById('ans-'+idx).value = btn.innerText;
+}
+
+function selectMulti(btn, idx) {
+    btn.classList.toggle('selected-btn');
+    const selected = Array.from(btn.parentElement.querySelectorAll('.selected-btn')).map(b => b.innerText);
+    document.getElementById('ans-'+idx).value = selected.join('|');
+}
+
+function finishTest() {
+    clearInterval(timerInterval);
+    let score = 0;
+    let logHTML = "";
+    
+    currentQuiz.forEach((item, idx) => {
+        let isCorrect = false;
+        let userVal = "";
+
+        if(item.type === "matrix") {
+            const selects = document.querySelectorAll(`.task-card:nth-child(${idx+1}) .sub-ans`);
+            let correctCount = 0;
+            selects.forEach(s => { if(s.value === s.dataset.correct) correctCount++; });
+            isCorrect = (correctCount === selects.length);
+            userVal = "Таблица заполнена";
+        } else {
+            userVal = document.getElementById('ans-'+idx).value.trim();
+            if(item.type === "multi") {
+                let userArr = userVal.split('|').sort();
+                let corrArr = item.a.sort();
+                isCorrect = (JSON.stringify(userArr) === JSON.stringify(corrArr));
+            } else {
+                isCorrect = (userVal.toUpperCase() === item.a.toUpperCase());
+            }
+        }
+        if(isCorrect) score++;
+        logHTML += `<p>Задание ${idx+1}: ${isCorrect ? '✅' : '❌'}</p>`;
+    });
+
+    const grade = (score === 5) ? 5 : (score === 4) ? 4 : (score === 3) ? 3 : 2;
+    const fio = document.getElementById('userName').value.toUpperCase();
+    const uClass = document.getElementById('userClass').value.toUpperCase();
+
+    fetch('https://script.google.com/macros/s/AKfycbw2tGpKUu5cr10aBY4k4XLiVDVYRbDqFh6iQxHgxEIw3-TsH7sLUMW2lEyVShs7BL2T/exec', {
+        method: 'POST', mode: 'no-cors',
+        body: JSON.stringify({fio, uClass, score, grade, consent: "ДА", station: "CB8"})
+    });
+
+    document.getElementById('test-container').classList.add('hidden');
+    document.getElementById('timer').classList.add('hidden');
+    document.getElementById('final-report').classList.remove('hidden');
+    document.getElementById('report-fio').innerText = fio;
+    document.getElementById('report-class').innerText = uClass;
+    document.getElementById('report-score').innerText = score + " / 5";
+    document.getElementById('report-grade').innerText = grade;
+    document.getElementById('answer-log').innerHTML = logHTML;
+}
+</script>
+</body>
+</html>
