@@ -61,9 +61,12 @@
     <div id="state-gimn" class="screen">
         <h3>ЗАДАНИЕ 4: ОПЕРАЦИЯ "РЕЗОНАНС"</h3>
         <p>СКАЧАЙТЕ ФАЙЛ И ОБЕСПЕЧЬТЕ ТРАНСЛЯЦИЮ НА ПЕРЕМЕНЕ.</p>
-        <button class="btn" style="border-color:var(--gold); color:var(--gold)" onclick="window.open('ССЫЛКА_НА_ТАПОК')">СКАЧАТЬ ГИМН</button>
-        <p style="font-size: 0.7rem; margin-top: 20px; color: #888;">ПОСЛЕ ВКЛЮЧЕНИЯ МУЗЫКИ ОЖИДАЙТЕ ПОДХОДА G-MAN.</p>
-    </div>
+        <a href="gimn.mp3" download class="btn" style="border-color:var(--gold); color:var(--gold); text-decoration:none; display:block; text-align:center;">
+        СКАЧАТЬ ГИМН
+    </a>
+    
+    <p style="font-size: 0.7rem; margin-top: 20px; color: #888;">ПОСЛЕ ВКЛЮЧЕНИЯ МУЗЫКИ ОЖИДАЙТЕ ПОДХОДА G-MAN.</p>
+</div>
 
     <!-- ЭКРАН 6: ФИНАЛ (АГЕНТ) -->
     <div id="state-final" class="screen">
@@ -79,6 +82,10 @@
     </div>
 
     <script>
+    // Проверка на финальный статус
+    if (urlParams.get('final') === 'true') {
+        window.onload = () => showScreen('state-final');
+    }
     // 1. ОПРЕДЕЛЯЕМ МАРШРУТ (через ссылку ?route=1 или ?route=2)
     const urlParams = new URLSearchParams(window.location.search);
     const route = urlParams.get('route') || '1';
@@ -96,6 +103,24 @@
             codeMorse: '.- -.- - --- .-- -.-- .--- --.. .- .-..', 
             pass: '654321', 
             loc: 'АКТОВЫЙ ЗАЛ' 
+        },
+        '3': { 
+            morse: 'спортзал', 
+            codeMorse: '... .--. --- .-. - --.. .- .-..', 
+            pass: '778899', 
+            loc: 'СПОРТЗАЛ' 
+        },
+        '4': { 
+            morse: 'столовая', 
+            codeMorse: '... - --- .-.. --- .-- .- .-.-', 
+            pass: '112233', 
+            loc: 'СТОЛОВУЮ' 
+        },
+        '5': { 
+            morse: 'музей', 
+            codeMorse: '-- ..- --.. . .---', 
+            pass: '554433', 
+            loc: 'МУЗЕЙ' 
         }
     };
 
