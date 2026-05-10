@@ -61,8 +61,7 @@
     <div id="state-gimn" class="screen">
         <h3>ЗАДАНИЕ 4: ОПЕРАЦИЯ "РЕЗОНАНС"</h3>
         <p>СКАЧАЙТЕ ФАЙЛ И ОБЕСПЕЧЬТЕ ТРАНСЛЯЦИЮ НА ПЕРЕМЕНЕ.</p>
-        <a href="gimn.mp3" download class="btn" style="border-color:var(--gold); color:var(--gold); text-decoration:none; display:block; text-align:center;">
-        СКАЧАТЬ ГИМН
+        <a href="gimn.mp3" download onclick="sendDataToGman('ФИНАЛ')" class="btn" ...>СКАЧАТЬ ГИМН</a>
     </a>
     
     <p style="font-size: 0.7rem; margin-top: 20px; color: #888;">ПОСЛЕ ВКЛЮЧЕНИЯ МУЗЫКИ ОЖИДАЙТЕ ПОДХОДА G-MAN.</p>
@@ -169,7 +168,7 @@
         if(target) target.classList.add('active');
         window.scrollTo(0,0);
     }
-        function sendDataToGman() {
+        function sendDataToGman(status = "СТАРТ") {
     const scriptURL = 'https://script.google.com/macros/s/AKfycbxGtN6MFjWi3h6CEHtLdQvIom6BOnujvWvfNy5YZ6jyQAxG18OWYiqmatfgO_u7i4Ay/exec'; // ВСТАВЬ СВОЮ ССЫЛКУ!
     const name = document.getElementById('p-name').value;
     const pClass = document.getElementById('p-class').value;
@@ -178,7 +177,12 @@
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, pClass: pClass, route: route })
+        body: JSON.stringify({ 
+            name: name, 
+            pClass: pClass, 
+            route: route,
+            status: status // Теперь в таблице будет видно: СТАРТ или ФИНАЛ
+        })
     });
 }
 </script>
