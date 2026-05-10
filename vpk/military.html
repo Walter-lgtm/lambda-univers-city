@@ -71,57 +71,29 @@
     <!-- ЭКРАН 6: ФИНАЛ (АГЕНТ) -->
     <div id="state-final" class="screen">
         <h2 style="color:var(--red)">ЦЕЛЬ ОБНАРУЖЕНА</h2>
-        <img src="https://placeholder.com" id="agent-art" style="border: 2px solid var(--red); width: 200px;">
+        <img src="agent.jpg">
         <div id="agent-info" style="text-align: left; display: inline-block; margin-top: 15px;">
-            <p>> ОБЪЕКТ: <span id="a-name">ИВАНОВА А.</span></p>
-            <p>> КЛАСС: 8 "Б"</p>
-            <p>> СТАТУС: ЮНАРМЕЕЦ</p>
-            <p>> ПАРОЛЬ: "ПОБЕДА БУДЕТ ЗА НАМИ"</p>
+            <p>> ОБЪЕКТ: <span id="a-name">САВИНА ЯНА</span></p>
+            <p>> КЛАСС: 8 "А"</p>
+            <p>> СТАТУС: НАЧАЛЬНИК ШТАБА ДИВИЗИИ</p>
+            <p>> ПАРОЛЬ: "ПОБЕДА БУДЕТ ЗА НАМИ!"</p>
         </div>
         <p style="font-size: 0.8rem; color: var(--gold); margin-top: 20px;">НАЙДИТЕ ЕЁ ПЕРВЫМИ И ПРОИЗНЕСИТЕ ПАРОЛЬ!</p>
     </div>
 
     <script>
-    // Проверка на финальный статус
-    if (urlParams.get('final') === 'true') {
-        window.onload = () => showScreen('state-final');
-    }
-    // 1. ОПРЕДЕЛЯЕМ МАРШРУТ (через ссылку ?route=1 или ?route=2)
+    // 1. ОПРЕДЕЛЯЕМ МАРШРУТ И ФИНАЛ
     const urlParams = new URLSearchParams(window.location.search);
     const route = urlParams.get('route') || '1';
+    const isFinal = urlParams.get('final');
 
-    // 2. КОНФИГУРАЦИЯ МАРШРУТОВ (Локации и шифры)
+    // 2. КОНФИГУРАЦИЯ МАРШРУТОВ
     const config = {
-        '1': { 
-            morse: 'библиотека', 
-            codeMorse: '-... .. -... .-.. .. --- - . -.- .-', 
-            pass: '123456', 
-            loc: 'БИБЛИОТЕКУ' 
-        },
-        '2': { 
-            morse: 'актовыйзал', 
-            codeMorse: '.- -.- - --- .-- -.-- .--- --.. .- .-..', 
-            pass: '654321', 
-            loc: 'АКТОВЫЙ ЗАЛ' 
-        },
-        '3': { 
-            morse: 'спортзал', 
-            codeMorse: '... .--. --- .-. - --.. .- .-..', 
-            pass: '778899', 
-            loc: 'СПОРТЗАЛ' 
-        },
-        '4': { 
-            morse: 'столовая', 
-            codeMorse: '... - --- .-.. --- .-- .- .-.-', 
-            pass: '112233', 
-            loc: 'СТОЛОВУЮ' 
-        },
-        '5': { 
-            morse: 'музей', 
-            codeMorse: '-- ..- --.. . .---', 
-            pass: '554433', 
-            loc: 'МУЗЕЙ' 
-        }
+        '1': { morse: 'библиотека', codeMorse: '-... .. -... .-.. .. --- - . -.- .-', pass: '123456', loc: 'БИБЛИОТЕКУ' },
+        '2': { morse: 'актовыйзал', codeMorse: '.- -.- - --- .-- -.-- .--- --.. .- .-..', pass: '654321', loc: 'АКТОВЫЙ ЗАЛ' },
+        '3': { morse: 'спортзал', codeMorse: '... .--. --- .-. - --.. .- .-..', pass: '778899', loc: 'СПОРТЗАЛ' },
+        '4': { morse: 'столовая', codeMorse: '... - --- .-.. --- .-- .- .-.-', pass: '112233', loc: 'СТОЛОВУЮ' },
+        '5': { morse: 'музей', codeMorse: '-- ..- --.. . .---', pass: '554433', loc: 'МУЗЕЙ' }
     };
 
     const currentConf = config[route] || config['1'];
@@ -134,24 +106,27 @@
         { img: 'major.jpg', name: 'МАЙОР' }
     ];
 
-    // Функция запуска квеста
+    // ПРОВЕРКА ФИНАЛА ПРИ ЗАГРУЗКЕ
+    window.onload = () => {
+        if (isFinal === 'true') {
+            showScreen('state-final');
+        }
+    };
+
     function startQuest() {
-        const nick = document.getElementById('p-name').value;
-        if(!nick) return alert("ВВЕДИТЕ ФИО!");
+        if(!document.getElementById('p-name').value) return alert("ВВЕДИТЕ ФИО!");
         
-        // Подставляем данные маршрута в интерфейс
         document.getElementById('morse-code').innerText = currentConf.codeMorse;
-        document.getElementById('state-library').querySelector('p').innerText = 
-            `ВЫДВИГАЙТЕСЬ В ${currentConf.loc}. НАЙДИТЕ ДОКУМЕНТ С ПЕЧАТЬЮ λ.`;
+        const libText = document.getElementById('state-library').querySelector('p');
+        if(libText) libText.innerText = `ВЫДВИГАЙТЕСЬ В ${currentConf.loc}. НАЙДИТЕ ДОКУМЕНТ С ПЕЧАТЬЮ λ.`;
         
         showScreen('state-pogony');
         renderPogony();
     }
 
-    // Отрисовка погон
     function renderPogony() {
         const container = document.getElementById('pogony-list');
-        container.innerHTML = ""; // Очистка
+        container.innerHTML = "";
         pogonyData.forEach((p, index) => {
             container.innerHTML += `
                 <div class="pogon-row">
@@ -163,12 +138,10 @@
                         <option value="ЛЕЙТЕНАНТ">ЛЕЙТЕНАНТ</option>
                         <option value="КАПИТАН">КАПИТАН</option>
                     </select>
-                </div>
-            `;
+                </div>`;
         });
     }
 
-    // Проверка Задания 1
     function checkPogony() {
         let correct = true;
         pogonyData.forEach((p, i) => {
@@ -178,29 +151,24 @@
         else alert("ОШИБКА В ЗВАНИЯХ! ПЕРЕПРОВЕРЬТЕ СУБОРДИНАЦИЮ.");
     }
 
-    // Проверка Задания 2 (Морзе)
     function checkMorse() {
         const ans = document.getElementById('morse-answer').value.toLowerCase().replace(/\s/g, '');
         if(ans === currentConf.morse) showScreen('state-library');
         else alert("ШИФРОВКА НЕВЕРНА. ПОПРОБУЙТЕ СНОВА.");
     }
 
-    // Проверка Задания 3 (Код из библиотеки/зала)
     function unlockGimn() {
         const code = document.getElementById('secret-6').value;
         if(code === currentConf.pass) showScreen('state-gimn');
         else alert("КОД НЕВЕРЕН. ИЩИТЕ ДОКУМЕНТ λ.");
     }
 
-    // Переключение экранов
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        const target = document.getElementById(id);
+        if(target) target.classList.add('active');
         window.scrollTo(0,0);
     }
-
-    // Эту функцию ты вызовешь через QR в конце
-    function setFinalState() { showScreen('state-final'); }
 </script>
 </body>
 </html>
