@@ -244,7 +244,7 @@
         {id: 17, name: "Сад огород, цветы", dates: "17-28 августа"}
     ];
   // СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwn3P6H8y5ZkWp45M9N7e3CHAGy1F8NgsRNsnxcL6cCWfbMp3sLQeQUhGM-zGV3AYvq/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJrqtAPvPkYK7vqqGB3DFC_PVXka9ijVXH6sUwsF6uDJHv9f9oCMvvp0KABEgy6ty3/exec";
 
     window.onload = function() {
         loadBrigadesStatus();
@@ -307,7 +307,7 @@
         });
     }
 
-    // Железобетонный метод отправки данных через невидимую форму
+    // Неубиваемый метод отправки данных через JSONP (Скрипт-тег)
     function sendData(id, name) {
         const fioInput = document.getElementById('fio');
         const fio = fioInput.value.trim();
@@ -321,45 +321,32 @@
         log(`ОТПРАВКА ДАННЫХ КАНДИДАТА [${fio}] В СЕКТОР [${name}]...`);
         disableAllButtons();
 
-        // Создаем невидимую форму, которую пропустит любой браузер
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = SCRIPT_URL;
-        form.target = 'hidden_iframe'; // Чтобы страница не перезагружалась
-
-        const fioField = document.createElement('input');
-        fioField.type = 'hidden';
-        fioField.name = 'fio';
-        fioField.value = fio;
-        form.appendChild(fioField);
-
-        const idField = document.createElement('input');
-        idField.type = 'hidden';
-        idField.name = 'brigadeId';
-        idField.value = id;
-        form.appendChild(idField);
-
-        // Создаем скрытый фрейм для приема ответа
-        let iframe = document.getElementById('hidden_iframe');
-        if (!iframe) {
-            iframe = document.createElement('iframe');
-            iframe.id = 'hidden_iframe';
-            iframe.name = 'hidden_iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-        }
-
-        // Ловим момент, когда форма отправилась
-        iframe.onload = function() {
-            log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${name}`);
-            fioInput.value = '';
-            // Перезагружаем лимиты кнопок через 1.5 секунды
-            setTimeout(loadBrigadesStatus, 1500);
+        // Создаем динамический тег <script>, который обходит любые ограничения браузера
+        const callbackName = 'googleAppsScriptCallback';
+        window[callbackName] = function(response) {
+            if (response && response.success) {
+                log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${name}`);
+                fioInput.value = '';
+            } else {
+                log("ОШИБКА РЕГИСТРАЦИИ: БРИГАДА ПЕРЕПОЛНЕНА ИЛИ НЕ НАЙДЕНА.", true);
+            }
+            // Удаляем временный тег скрипта из документа
+            document.body.removeChild(script);
+            delete window[callbackName];
+            // Обновляем статусы кнопок
+            setTimeout(loadBrigadesStatus, 1000);
         };
 
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+        const script = document.createElement('script');
+        // Передаем параметры прямо в строке URL (GET запрос)
+        script.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigadeId=${id}&callback=${callbackName}`;
+        
+        script.onerror = function() {
+            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ ЧЕРНОЙ МЕЗЫ.", true);
+            loadBrigadesStatus();
+        };
+
+        document.body.appendChild(script);
     }
 
     function disableAllButtons() {
