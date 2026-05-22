@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Black Mesa - ЛТЧ 2026</title>
+    <style>
+        :root {
+            --hl-orange: #ffb000;
+            --hl-orange-dim: #aa7500;
+            --hl-bg: #110a00;
+            --hl-panel: #221400;
+            --hl-danger: #ff3300;
+            --hl-disabled: #442800;
+        }
+
+        body {
+            background-color: var(--hl-bg);
+            color: var(--hl-orange);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Эффект ЭЛТ монитора */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 255, 0, 0.06));
+            z-index: 99999;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .terminal-container {
+            width: 100%;
+            max-width: 900px;
+            border: 2px solid var(--hl-orange);
+            background-color: var(--hl-panel);
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(255, 176, 0, 0.2);
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px dashed var(--hl-orange);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .lambda-logo {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--hl-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            font-weight: bold;
+            box-shadow: 0 0 10px var(--hl-orange);
+        }
+
+        .title-text h1 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .title-text p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            color: var(--hl-orange-dim);
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background-color: var(--hl-bg);
+            border: 1px solid var(--hl-orange);
+            color: var(--hl-orange);
+            padding: 12px;
+            font-size: 18px;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 10px rgba(255, 176, 0, 0.5);
+        }
+
+        .grid-title {
+            font-size: 16px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--hl-orange-dim);
+            padding-bottom: 5px;
+        }
+
+        .brigades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 15px;
+        }
+
+        .brigade-btn {
+            background-color: var(--hl-bg);
+            border: 1px solid var(--hl-orange);
+            color: var(--hl-orange);
+            padding: 15px;
+            font-family: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brigade-btn:hover:not(:disabled) {
+            background-color: var(--hl-orange);
+            color: var(--hl-bg);
+            box-shadow: 0 0 12px var(--hl-orange);
+            font-weight: bold;
+        }
+
+        .b-name {
+            font-size: 15px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .b-date {
+            font-size: 12px;
+            color: var(--hl-orange-dim);
+        }
+
+        .brigade-btn:hover .b-date {
+            color: var(--hl-bg);
+        }
+
+        .brigade-btn:disabled {
+            border-color: var(--hl-danger);
+            color: var(--hl-danger);
+            background-color: #200000;
+            cursor: not-allowed;
+        }
+        
+        .brigade-btn:disabled .b-date {
+            color: #aa0000;
+        }
+
+        .status-badge {
+            margin-top: 5px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        #log-screen {
+            margin-top: 25px;
+            background-color: var(--hl-bg);
+            border: 1px dashed var(--hl-orange-dim);
+            padding: 15px;
+            min-height: 40px;
+            font-size: 14px;
+            color: #00ff00;
+        }
+
+        .loading {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="terminal-container">
+    <div class="header">
+        <div class="title-text">
+            <h1>BLACK MESA CENTRAL TERMINAL</h1>
+            <p>СИСТЕМА РАСПРЕДЕЛЕНИЯ ЛТЧ — СЕКТОР 6В (ГОД 2026)</p>
+        </div>
+        <div class="lambda-logo">λ</div>
+    </div>
+
+    <div class="input-section">
+        <label for="fio">ВВЕДИТЕ ФИО УЧАЩЕГОСЯ ДЛЯ ИДЕНТИФИКАЦИИ:</label>
+        <input type="text" id="fio" placeholder="Например: Гордон Фримен" autocomplete="off">
+    </div>
+
+    <div class="grid-title">ВЫБЕРИТЕ ДЕСТИНАЦИЮ (НАЗВАНИЕ БРИГАДЫ):</div>
+    <div class="brigades-grid" id="buttons-container">
+        <div class="loading">ПОДКЛЮЧЕНИЕ К СЕРВЕРУ ДАННЫХ... ПОДОЖДИТЕ...</div>
+    </div>
+
+    <div id="log-screen">> СТАТУС СИСТЕМЫ: ГОТОВ К ОПЕРАЦИЯМ</div>
+</div>
+
+<script>
+    // Массив со всеми локациями и сроками
+    const brigadesData = [
+        {id: 1, name: "Библиотека", dates: "1-12 июня"},
+        {id: 2, name: "Чистюля", dates: "1-12 июня"},
+        {id: 3, name: "Библиотека (начальная школа)", dates: "1-12 июня"},
+        {id: 4, name: "Детский сад", dates: "15-26 июня"},
+        {id: 5, name: "Силачи", dates: "15-26 июня"},
+        {id: 6, name: "Библиотека", dates: "15-26 июня"},
+        {id: 7, name: "Библиотека (начальная школа)", dates: "15-22 июня"},
+        {id: 8, name: "Библиотека", dates: "29 июня-10 июля"},
+        {id: 9, name: "Сад огород, цветы", dates: "29 июня-10 июля"},
+        {id: 10, name: "Сад огород, цветы", dates: "13-24 июля"},
+        {id: 11, name: "Библиотека", dates: "13-24 июля"},
+        {id: 12, name: "Чистюли", dates: "13-24 июля"},
+        {id: 13, name: "Сад огород, цветы", dates: "27 июля-7 августа"},
+        {id: 14, name: "Сад огород, цветы", dates: "10-21 августа"},
+        {id: 15, name: "Силачи", dates: "10-21 августа"},
+        {id: 16, name: "Силачи", dates: "17-28 августа"},
+        {id: 17, name: "Сад огород, цветы", dates: "17-28 августа"}
+    ];
+  // СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwR5br3P-ttN1XyP3BOLNJyPC19SQnQZk2b7Fh2aNeTiadMSUEVGLxyTye5WNNinv82/exec";
+
+    window.onload = function() {
+        loadBrigadesStatus();
+    };
+
+    function log(message, isError = false) {
+        const logScreen = document.getElementById('log-screen');
+        logScreen.style.color = isError ? '#ff3300' : '#00ff00';
+        logScreen.innerText = "> " + message;
+    }
+
+    function loadBrigadesStatus() {
+        log("СИНХРОНИЗАЦИЯ БАЗЫ ДАННЫХ ЛТЧ...");
+        
+        fetch(`${SCRIPT_URL}?action=getStatus`)
+            .then(response => response.json())
+            .then(statusMap => {
+                renderButtons(statusMap);
+                log("СИНХРОНИЗАЦИЯ ЗАВЕРШЕНА. ВЫБЕРИТЕ ЛОКАЦИЮ.");
+            })
+            .catch(error => {
+                console.error(error);
+                renderButtons({});
+                log("ВНИМАНИЕ: РАБОТА В ОФФЛАЙН РЕЖИМЕ. ПРОВЕРКА ЛИМИТОВ ОТКЛЮЧЕНА.", true);
+            });
+    }
+
+    function renderButtons(statusMap) {
+        const container = document.getElementById('buttons-container');
+        container.innerHTML = '';
+
+        brigadesData.forEach(b => {
+            const btn = document.createElement('button');
+            btn.className = 'brigade-btn';
+            
+            const liveStatus = statusMap[b.id];
+            let isFull = false;
+            let statusText = "ДОСТУПНО";
+
+            if (liveStatus) {
+                isFull = liveStatus.isFull;
+                statusText = isFull ? "УКОМПЛЕКТОВАНО" : `ОСТАЛОСЬ МЕСТ: ${liveStatus.left}`;
+            }
+
+            btn.innerHTML = `
+                <span class="b-name">${b.name}</span>
+                <span class="b-date">Сроки: ${b.dates}</span>
+                <span class="status-badge" style="color: ${isFull ? 'var(--hl-danger)' : '#00ff00'}">${statusText}</span>
+            `;
+
+            if (isFull) {
+                btn.disabled = true;
+            }
+
+            btn.onclick = function() {
+                sendData(b.id, b.name);
+            };
+
+            container.appendChild(btn);
+        });
+    }
+
+    function sendData(id, name) {
+        const fioInput = document.getElementById('fio');
+        const fio = fioInput.value.trim();
+
+        if (fio.length < 3) {
+            log("КРИТИЧЕСКАЯ ОШИБКА: ОТКАЗ В ДОСТУПЕ. ВВЕДИТЕ КОРРЕКТНОЕ ФИО!", true);
+            fioInput.focus();
+            return;
+        }
+
+        log(`ОТПРАВКА ДАННЫХ КАНДИДАТА [${fio}] В СЕКТОР [${name}]...`);
+        disableAllButtons();
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ 'fio': fio, 'brigadeId': id })
+        })
+        .then(() => {
+            log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${name}`);
+            fioInput.value = '';
+            setTimeout(loadBrigadesStatus, 1500);
+        })
+        .catch(err => {
+            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ ЧЕРНОЙ МЕЗЫ. ПОВТОРИТЕ ПОПЫТКУ.", true);
+            enableAllButtons();
+        });
+    }
+
+    function disableAllButtons() {
+        const buttons = document.querySelectorAll('.brigade-btn');
+        buttons.forEach(b => b.disabled = true);
+    }
+
+    function enableAllButtons() {
+        loadBrigadesStatus();
+    }
+</script>
+</body>
+</html>
