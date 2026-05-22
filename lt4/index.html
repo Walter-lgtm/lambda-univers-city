@@ -307,6 +307,7 @@
         });
     }
 
+    // Железобетонный метод отправки данных через невидимую форму
     function sendData(id, name) {
         const fioInput = document.getElementById('fio');
         const fio = fioInput.value.trim();
@@ -320,30 +321,50 @@
         log(`ОТПРАВКА ДАННЫХ КАНДИДАТА [${fio}] В СЕКТОР [${name}]...`);
         disableAllButtons();
 
-        fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ 'fio': fio, 'brigadeId': id })
-        })
-        .then(() => {
+        // Создаем невидимую форму, которую пропустит любой браузер
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SCRIPT_URL;
+        form.target = 'hidden_iframe'; // Чтобы страница не перезагружалась
+
+        const fioField = document.createElement('input');
+        fioField.type = 'hidden';
+        fioField.name = 'fio';
+        fioField.value = fio;
+        form.appendChild(fioField);
+
+        const idField = document.createElement('input');
+        idField.type = 'hidden';
+        idField.name = 'brigadeId';
+        idField.value = id;
+        form.appendChild(idField);
+
+        // Создаем скрытый фрейм для приема ответа
+        let iframe = document.getElementById('hidden_iframe');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'hidden_iframe';
+            iframe.name = 'hidden_iframe';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+
+        // Ловим момент, когда форма отправилась
+        iframe.onload = function() {
             log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${name}`);
             fioInput.value = '';
+            // Перезагружаем лимиты кнопок через 1.5 секунды
             setTimeout(loadBrigadesStatus, 1500);
-        })
-        .catch(err => {
-            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ ЧЕРНОЙ МЕЗЫ. ПОВТОРИТЕ ПОПЫТКУ.", true);
-            enableAllButtons();
-        });
+        };
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
     }
 
     function disableAllButtons() {
         const buttons = document.querySelectorAll('.brigade-btn');
         buttons.forEach(b => b.disabled = true);
-    }
-
-    function enableAllButtons() {
-        loadBrigadesStatus();
     }
 </script>
 </body>
