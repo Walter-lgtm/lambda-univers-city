@@ -243,11 +243,12 @@
         {id: 16, name: "Силачи", dates: "17-28 августа"},
         {id: 17, name: "Сад огород, цветы", dates: "17-28 августа"}
     ];
-  // СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyJrqtAPvPkYK7vqqGB3DFC_PVXka9ijVXH6sUwsF6uDJHv9f9oCMvvp0KABEgy6ty3/exec";
+  // ТВОЯ ССЫЛКА, КОТОРУЮ ТЫ ПОЛУЧИЛ В ШАГЕ 1
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyr50gbxJ5K1XC-5H0NLzxTtzAijrMBu0ZfmPdaO1FVZgwxGakI1SLgpSpSDf0xiSL8/exec";
 
     window.onload = function() {
-        loadBrigadesStatus();
+        log("СИСТЕМА ГОТОВА К РАСПРЕДЕЛЕНИЮ. ВВЕДИТЕ ФИО И ВЫБЕРИТЕ БРИГАДУ.");
+        renderButtons();
     };
 
     function log(message, isError = false) {
@@ -256,102 +257,51 @@
         logScreen.innerText = "> " + message;
     }
 
-    function loadBrigadesStatus() {
-        log("СИНХРОНИЗАЦИЯ БАЗЫ ДАННЫХ ЛТЧ...");
-        
-        fetch(`${SCRIPT_URL}?action=getStatus`)
-            .then(response => response.json())
-            .then(statusMap => {
-                renderButtons(statusMap);
-                log("СИНХРОНИЗАЦИЯ ЗАВЕРШЕНА. ВЫБЕРИТЕ ЛОКАЦИЮ.");
-            })
-            .catch(error => {
-                console.error(error);
-                renderButtons({});
-                log("ВНИМАНИЕ: РАБОТА В ОФФЛАЙН РЕЖИМЕ. ПРОВЕРКА ЛИМИТОВ ОТКЛЮЧЕНА.", true);
-            });
-    }
-
-    function renderButtons(statusMap) {
+    function renderButtons() {
         const container = document.getElementById('buttons-container');
         container.innerHTML = '';
 
         brigadesData.forEach(b => {
             const btn = document.createElement('button');
             btn.className = 'brigade-btn';
-            
-            const liveStatus = statusMap[b.id];
-            let isFull = false;
-            let statusText = "ДОСТУПНО";
-
-            if (liveStatus) {
-                isFull = liveStatus.isFull;
-                statusText = isFull ? "УКОМПЛЕКТОВАНО" : `ОСТАЛОСЬ МЕСТ: ${liveStatus.left}`;
-            }
-
             btn.innerHTML = `
                 <span class="b-name">${b.name}</span>
                 <span class="b-date">Сроки: ${b.dates}</span>
-                <span class="status-badge" style="color: ${isFull ? 'var(--hl-danger)' : '#00ff00'}">${statusText}</span>
+                <span class="status-badge" style="color: #00ff00">ДОСТУПНО</span>
             `;
 
-            if (isFull) {
-                btn.disabled = true;
-            }
-
             btn.onclick = function() {
-                sendData(b.id, b.name);
+                sendDataDirectly(b.name, b.dates);
             };
 
             container.appendChild(btn);
         });
     }
 
-    // Неубиваемый метод отправки данных через JSONP (Скрипт-тег)
-    function sendData(id, name) {
+    // Самый простой и прямой метод отправки через один клик
+    function sendDataDirectly(brigadeName, brigadeDates) {
         const fioInput = document.getElementById('fio');
         const fio = fioInput.value.trim();
 
         if (fio.length < 3) {
-            log("КРИТИЧЕСКАЯ ОШИБКА: ОТКАЗ В ДОСТУПЕ. ВВЕДИТЕ КОРРЕКТНОЕ ФИО!", true);
+            log("ОТКАЗ В ДОСТУПЕ. ВВЕДИТЕ КОРРЕКТНОЕ ФИО!", true);
             fioInput.focus();
             return;
         }
 
-        log(`ОТПРАВКА ДАННЫХ КАНДИДАТА [${fio}] В СЕКТОР [${name}]...`);
-        disableAllButtons();
+        log(`ОТПРАВКА ДАННЫХ [${fio}] В ТАБЛИЦУ...`);
 
-        // Создаем динамический тег <script>, который обходит любые ограничения браузера
-        const callbackName = 'googleAppsScriptCallback';
-        window[callbackName] = function(response) {
-            if (response && response.success) {
-                log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${name}`);
-                fioInput.value = '';
-            } else {
-                log("ОШИБКА РЕГИСТРАЦИИ: БРИГАДА ПЕРЕПОЛНЕНА ИЛИ НЕ НАЙДЕНА.", true);
-            }
-            // Удаляем временный тег скрипта из документа
-            document.body.removeChild(script);
-            delete window[callbackName];
-            // Обновляем статусы кнопок
-            setTimeout(loadBrigadesStatus, 1000);
-        };
-
+        // Создаем скрытый элемент, который мгновенно передает данные без блокировок браузера
         const script = document.createElement('script');
-        // Передаем параметры прямо в строке URL (GET запрос)
-        script.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigadeId=${id}&callback=${callbackName}`;
+        script.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigade=${encodeURIComponent(brigadeName)}&dates=${encodeURIComponent(brigadeDates)}&callback=callbackFunc`;
         
-        script.onerror = function() {
-            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ ЧЕРНОЙ МЕЗЫ.", true);
-            loadBrigadesStatus();
+        window.callbackFunc = function(response) {
+            log(`УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН: ${brigadeName}`);
+            fioInput.value = '';
+            document.body.removeChild(script);
         };
 
         document.body.appendChild(script);
-    }
-
-    function disableAllButtons() {
-        const buttons = document.querySelectorAll('.brigade-btn');
-        buttons.forEach(b => b.disabled = true);
     }
 </script>
 </body>
