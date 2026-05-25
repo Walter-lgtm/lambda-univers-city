@@ -289,20 +289,34 @@
             return;
         }
 
-        log(`ОТПРАВКА ДАННЫХ [${fio}] В ТАБЛИЦУ...`);
+        log(`ИДЕНТИФИКАЦИЯ ПОЛЬЗОВАТЕЛЯ [${fio}]... ПРОВЕРКА ДАННЫХ...`);
+        disableAllButtons();
 
-        // Создаем скрытый элемент, который мгновенно передает данные без блокировок браузера
         const script = document.createElement('script');
         script.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigade=${encodeURIComponent(brigadeName)}&dates=${encodeURIComponent(brigadeDates)}&callback=callbackFunc`;
         
         window.callbackFunc = function(response) {
-            log(`УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН: ${brigadeName}`);
-            fioInput.value = '';
+            if (response && response.status === "already_exists") {
+                // Если база данных вернула дубликат — выдаем жесткий отказ в доступе
+                log(`КРИТИЧЕСКАЯ ОШИБКА: ОТКАЗ В ДОСТУПЕ! ПОЛЬЗОВАТЕЛЬ [${fio}] УЖЕ ЗАРЕГИСТРИРОВАН В СИСТЕМЕ!`, true);
+                enableAllButtons();
+            } else {
+                // Если всё хорошо — успешно записываем
+                log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${brigadeName}`);
+                fioInput.value = '';
+                enableAllButtons();
+            }
             document.body.removeChild(script);
+        };
+
+        script.onerror = function() {
+            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ. ПОВТОРИТЕ ПОПЫТКУ.", true);
+            enableAllButtons();
         };
 
         document.body.appendChild(script);
     }
+
 </script>
 </body>
 </html>
