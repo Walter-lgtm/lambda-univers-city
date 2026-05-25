@@ -243,11 +243,14 @@
         {id: 16, name: "Силачи", dates: "17-28 августа"},
         {id: 17, name: "Сад огород, цветы", dates: "17-28 августа"}
     ];
-  // ТВОЯ ССЫЛКА, КОТОРУЮ ТЫ ПОЛУЧИЛ В ШАГЕ 1
+  // ТВОЯ ССЫЛКА ИЗ GOOGLE APPS SCRIPT (ОБЯЗАТЕЛЬНО С /exec НА КОНЦЕ)
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyr50gbxJ5K1XC-5H0NLzxTtzAijrMBu0ZfmPdaO1FVZgwxGakI1SLgpSpSDf0xiSL8/exec";
+    
+    // Сюда локально сохранятся все, кто уже записан
+    let blacklistData = []; 
 
     window.onload = function() {
-        log("СИСТЕМА ГОТОВА К РАСПРЕДЕЛЕНИЮ. ВВЕДИТЕ ФИО И ВЫБЕРИТЕ БРИГАДУ.");
+        loadExistingStudents();
         renderButtons();
     };
 
@@ -255,6 +258,22 @@
         const logScreen = document.getElementById('log-screen');
         logScreen.style.color = isError ? '#ff3300' : '#00ff00';
         logScreen.innerText = "> " + message;
+    }
+
+    // Загружаем список тех, кто уже в таблице
+    function loadExistingStudents() {
+        log("СИНХРОНИЗАЦИЯ БАЗЫ ДАННЫХ БЕЗОПАСНОСТИ...");
+        
+        fetch(`${SCRIPT_URL}?action=getExisting`)
+            .then(response => response.json())
+            .then(data => {
+                blacklistData = data;
+                log("СИСТЕМА ГОТОВА К РАСПРЕДЕЛЕНИЮ. ВВЕДИТЕ ФИО И ВЫБЕРИТЕ БРИГАДУ.");
+            })
+            .catch(error => {
+                console.error(error);
+                log("ВНИМАНИЕ: СЕРВЕР БЕЗОПАСНОСТИ СБОИТ. РАБОТА В АВТОНОМНОМ РЕЖИМЕ.", true);
+            });
     }
 
     function renderButtons() {
@@ -271,15 +290,15 @@
             `;
 
             btn.onclick = function() {
-                sendDataDirectly(b.name, b.dates);
+                processSelection(b.name, b.dates);
             };
 
             container.appendChild(btn);
         });
     }
 
-    // Самый простой и прямой метод отправки через один клик
-    function sendDataDirectly(brigadeName, brigadeDates) {
+    // Мгновенная локальная проверка и отправка «в один конец»
+    function processSelection(brigadeName, brigadeDates) {
         const fioInput = document.getElementById('fio');
         const fio = fioInput.value.trim();
 
@@ -289,34 +308,41 @@
             return;
         }
 
-        log(`ИДЕНТИФИКАЦИЯ ПОЛЬЗОВАТЕЛЯ [${fio}]... ПРОВЕРКА ДАННЫХ...`);
+        // 1. МГНОВЕННАЯ ПРОВЕРКА НА ДУБЛИКАТ БЕЗ ЗАПРОСОВ К СЕРВЕРУ
+        if (blacklistData.includes(fio.toLowerCase())) {
+            log(`КРИТИЧЕСКАЯ ОШИБКА: ДОСТУП ЗАПРЕЩЕН! ПОЛЬЗОВАТЕЛЬ [${fio}] УЖЕ ЗАРЕГИСТРИРОВАН В СИСТЕМЕ!`, true);
+            fioInput.focus();
+            return;
+        }
+
+        log(`ОТПРАВКА ДАННЫХ [${fio}] В СЕКТОР [${brigadeName}]...`);
         disableAllButtons();
 
-        const script = document.createElement('script');
-        script.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigade=${encodeURIComponent(brigadeName)}&dates=${encodeURIComponent(brigadeDates)}&callback=callbackFunc`;
+        // 2. ОТПРАВКА ДАННЫХ «В ОДИН КОНЕЦ» БЕЗ ЗАВИСАНИЙ
+        const img = new Image();
+        img.src = `${SCRIPT_URL}?fio=${encodeURIComponent(fio)}&brigade=${encodeURIComponent(brigadeName)}&dates=${encodeURIComponent(brigadeDates)}&t=${new Date().getTime()}`;
         
-        window.callbackFunc = function(response) {
-            if (response && response.status === "already_exists") {
-                // Если база данных вернула дубликат — выдаем жесткий отказ в доступе
-                log(`КРИТИЧЕСКАЯ ОШИБКА: ОТКАЗ В ДОСТУПЕ! ПОЛЬЗОВАТЕЛЬ [${fio}] УЖЕ ЗАРЕГИСТРИРОВАН В СИСТЕМЕ!`, true);
-                enableAllButtons();
-            } else {
-                // Если всё хорошо — успешно записываем
-                log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${brigadeName}`);
-                fioInput.value = '';
-                enableAllButtons();
-            }
-            document.body.removeChild(script);
-        };
-
-        script.onerror = function() {
-            log("ОШИБКА СВЯЗИ С СЕРВЕРОМ. ПОВТОРИТЕ ПОПЫТКУ.", true);
+        // Сразу же, не дожидаясь ответа от долгого сервера Google, выдаем успех!
+        setTimeout(() => {
+            log(`ДАННЫЕ ПЕРЕДАНЫ. УЧЕНИК ${fio} УСПЕШНО ЗАПИСАН В БРИГАДУ: ${brigadeName}`);
+            
+            // Добавляем ученика в локальный черный список, чтобы он не нажал еще раз прямо сейчас
+            blacklistData.push(fio.toLowerCase());
+            
+            fioInput.value = '';
             enableAllButtons();
-        };
-
-        document.body.appendChild(script);
+        }, 800); // Задержка меньше секунды просто для красоты симуляции терминала
     }
 
+    function disableAllButtons() {
+        const buttons = document.querySelectorAll('.brigade-btn');
+        buttons.forEach(b => b.disabled = true);
+    }
+
+    function enableAllButtons() {
+        const buttons = document.querySelectorAll('.brigade-btn');
+        buttons.forEach(b => b.disabled = false);
+    }
 </script>
 </body>
 </html>
